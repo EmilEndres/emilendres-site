@@ -469,6 +469,7 @@
     line-height: 0;
   }
   .gis-figure img { width: 100%; height: auto; display: block; }
+  .entry .gis-figure { max-width: 620px; }
 
   .ops-grid {
     display: grid;
@@ -837,6 +838,35 @@
             GeoJSON and GeoTIFF DTM inputs — a clear read on site characteristics,
             block by block.</p>
           <div class="stack"><span>Python</span><span>Plotly</span><span>GeoTIFF</span><span>NumPy</span></div>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="meta"><span class="id">LOG-005</span>2026</div>
+        <div class="body">
+          <h3>Waypoint Studio</h3>
+          <p>A browser-based mission-planning tool for building and editing drone
+            flight paths — full CSV/KMZ round-trip, standards-compliant export, and a
+            live map overlay, so complex routes can be designed, tuned, and shared
+            without leaving the browser.</p>
+          <div class="stack"><span>JavaScript</span><span>HTML5</span><span>KMZ / WPML</span><span>Leaflet</span></div>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="meta"><span class="id">LOG-006</span>2026</div>
+        <div class="body">
+          <h3>Flight Log &amp; Performance Validation Suite</h3>
+          <p>Tooling that parses raw flight logs and geotagged imagery into clear
+            performance and data-quality reports — turning thousands of telemetry rows
+            and photo records into an at-a-glance verdict on whether a flight met spec.</p>
+          <div class="stack"><span>Python</span><span>Pandas</span><span>EXIF / XMP</span><span>Matplotlib</span></div>
+          <figure class="gis-figure" style="margin-top:20px;">
+            <img src="report_performance.png" alt="Flight performance validation report — pass/fail requirements table and telemetry charts" loading="lazy" />
+          </figure>
+          <figure class="gis-figure" style="margin-top:16px;">
+            <img src="report_survey.png" alt="Survey quality validation report — coverage summary, quality checks, and overlap distributions" loading="lazy" />
+          </figure>
         </div>
       </div>
     </div>
