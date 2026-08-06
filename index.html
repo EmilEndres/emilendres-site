@@ -420,6 +420,18 @@
     overflow: hidden;
   }
   .ft-visual svg { width: 90%; max-width: 360px; }
+  .ft-visual video {
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+    object-fit: cover;
+    display: block;
+  }
+  .ft-link { margin-top: 6px; }
+  .ft-link a {
+    color: #45c4b0; text-decoration: none; font-weight: 600;
+    font-size: 15px; letter-spacing: 0.02em;
+  }
+  .ft-link a:hover { text-decoration: underline; }
   .scope-sweep { transform-origin: 200px 200px; animation: spin 8s linear infinite; }
   .ft-visual .blip { animation: blink 2.4s ease-in-out infinite; }
 
@@ -670,7 +682,7 @@
       </div>
       <div class="cell">
         <span class="k">Platform</span>
-        <span class="v">DJI Dock · M4TD</span>
+        <span class="v">DJI Matrice 3D / 4TD · M3M · M3T · Dock 2/3</span>
       </div>
       <div class="cell">
         <span class="k">Status</span>
@@ -745,53 +757,30 @@
 
     <div class="featured">
       <div class="ft-body">
-        <span class="ft-tag"><span class="live"></span> Launching soon</span>
-        <h3>Scope</h3>
-        <p class="ft-sub">A live flight-radar app, built from the ground up.</p>
-        <p>Real-time aircraft tracking on a dark radar map: live ADS-B traffic,
-          aircraft photos and route lookups, a weather-radar overlay, range rings,
-          flight trails, and a watchlist that alerts you when a tracked aircraft
-          appears or lands. Shipping as an Android app and in the browser.</p>
+        <span class="ft-tag"><span class="live"></span> Live</span>
+        <h3>SCOPE Air Tracker</h3>
+        <p class="ft-sub">A live flight-radar app, built by a UAV operations specialist — for UAV pilots.</p>
+        <p>A personal project I built to solve a problem I was facing in my own drone
+          operations: knowing what's in the airspace around me before and during a
+          flight. SCOPE Air Tracker renders live ADS-B traffic as a radar sweep and
+          lets you filter aircraft by altitude band — so you can isolate low-level
+          traffic in your operating area and keep situational awareness for safer
+          flights within designated airspace. Built with UAV pilots in mind. Global
+          coverage, airport weather and METAR, military airports and aircraft, aircraft
+          photos and route lookups, live trails, and a watchlist that alerts you when a
+          tracked aircraft appears or lands. Live now in the browser, with a native app
+          in development.</p>
+        <p class="ft-link"><a href="https://scopeairtracker.com/" target="_blank" rel="noopener">View live &rarr;</a></p>
         <div class="badges">
-          <span class="badge"><span class="ic">●</span> Android</span>
-          <span class="badge"><span class="ic">●</span> Web / browser</span>
+          <span class="badge"><span class="ic">●</span> Live · Web</span>
+          <span class="badge"><span class="ic">●</span> Native app in development</span>
         </div>
         <div class="ft-stack">
-          <span>JavaScript</span><span>Leaflet</span><span>ADS-B</span><span>RainViewer</span><span>PlaneSpotters API</span><span>PWA</span>
+          <span>JavaScript</span><span>Leaflet</span><span>ADS-B</span><span>Firebase</span><span>Stripe</span><span>Netlify Functions</span><span>AeroDataBox</span><span>MET Norway</span><span>NOAA METAR</span><span>PlaneSpotters</span>
         </div>
       </div>
       <div class="ft-visual">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Radar scope">
-          <defs>
-            <radialGradient id="scopeGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#45c4b0" stop-opacity="0.10"/>
-              <stop offset="100%" stop-color="#45c4b0" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#45c4b0" stop-opacity="0"/>
-              <stop offset="100%" stop-color="#45c4b0" stop-opacity="0.32"/>
-            </linearGradient>
-          </defs>
-          <circle cx="200" cy="200" r="180" fill="url(#scopeGlow)"/>
-          <g fill="none" stroke="#25333f" stroke-width="1.2">
-            <circle cx="200" cy="200" r="60"/>
-            <circle cx="200" cy="200" r="120"/>
-            <circle cx="200" cy="200" r="178"/>
-            <line x1="200" y1="22" x2="200" y2="378"/>
-            <line x1="22" y1="200" x2="378" y2="200"/>
-          </g>
-          <g class="scope-sweep">
-            <path d="M200,200 L200,22 A178,178 0 0,1 352,140 Z" fill="url(#sweepGrad)"/>
-            <line x1="200" y1="200" x2="200" y2="22" stroke="#45c4b0" stroke-width="1.5"/>
-          </g>
-          <g fill="#f0a838">
-            <path class="blip" transform="translate(150,132) rotate(35)" d="M0,-7 L5,7 L0,4 L-5,7 Z"/>
-            <path class="blip" transform="translate(262,176) rotate(-60)" d="M0,-7 L5,7 L0,4 L-5,7 Z"/>
-            <path class="blip" transform="translate(176,268) rotate(120)" d="M0,-7 L5,7 L0,4 L-5,7 Z"/>
-            <path class="blip" transform="translate(244,256) rotate(200)" d="M0,-6 L4,6 L0,3 L-4,6 Z"/>
-          </g>
-          <circle cx="200" cy="200" r="3.5" fill="#45c4b0"/>
-        </svg>
+        <video src="scope-demo.mp4" autoplay muted loop playsinline preload="metadata" aria-label="SCOPE Air Tracker live flight radar demo"></video>
       </div>
     </div>
 
