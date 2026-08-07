@@ -20,7 +20,7 @@
     --line:       #c3c0b0;
     --line-soft:  #d5d2c4;
     --fg:         #1c231f;
-    --fg-dim:     #4e564c;
+    --fg-dim:     #394037;
     --fg-faint:   #6f7669;
     --magenta:    #a32e6e;   /* airspace boundary */
     --magenta-lo: #ddb6cb;
@@ -168,7 +168,7 @@
   }
   .hero .lede {
     font-size: 19.5px;
-    font-weight: 300;
+    font-weight: 400;
     color: var(--fg-dim);
     max-width: 580px;
     margin-bottom: 38px;
@@ -185,13 +185,9 @@
     overflow: hidden;
   }
   .telemetry .cell {
-    padding: 13px 20px;
-    border-right: 1px solid var(--line-soft);
-    border-bottom: 1px solid var(--line-soft);
+    padding: 16px 22px;
   }
-  .telemetry .cell:nth-child(even) { border-right: none; }
-  .telemetry .cell:nth-last-child(-n+2) { border-bottom: none; }
-  .telemetry .cell:nth-child(3) { grid-column: 1 / -1; border-right: none; border-bottom: none; }
+  .telemetry .cell:nth-child(3) { grid-column: 1 / -1; padding-top: 6px; }
   .tele-link { color: var(--blue); text-decoration: none; }
   .tele-link:hover { text-decoration: underline; }
   .telemetry .k {
@@ -248,7 +244,7 @@
     margin: 16px 0 14px;
     letter-spacing: -0.032em;
   }
-  .section-head p { color: var(--fg-dim); font-weight: 300; }
+  .section-head p { color: var(--fg-dim); font-weight: 400; }
 
   /* dashed airspace boundary as the section rule */
   .divider { border-top: 1px dashed rgba(163, 46, 110, 0.5); }
@@ -273,7 +269,7 @@
     letter-spacing: -0.02em;
     margin: 0 0 12px;
   }
-  .cap p { font-size: 16.5px; font-weight: 300; color: var(--fg-dim); line-height: 1.6; }
+  .cap p { font-size: 16.5px; font-weight: 400; color: var(--fg-dim); line-height: 1.6; }
   .cap ul {
     list-style: none;
     margin-top: 18px;
@@ -289,17 +285,19 @@
   }
   .cap li::before { content: "› "; color: var(--magenta); }
 
-  .log { border-top: 1px solid var(--line); }
+  .log { display: grid; gap: 18px; }
   .entry {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 28px;
     align-items: start;
-    padding: 30px 6px;
-    border-bottom: 1px solid var(--line-soft);
-    transition: background 0.2s;
+    padding: 32px 34px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    transition: border-color 0.25s, transform 0.25s;
   }
-  .entry:hover { background: rgba(244, 242, 234, 0.62); }
+  .entry:hover { border-color: var(--magenta); transform: translateY(-2px); }
   .entry .body h3 {
     font-family: var(--display);
     font-weight: 700;
@@ -307,7 +305,7 @@
     letter-spacing: -0.022em;
     margin-bottom: 8px;
   }
-  .entry .body p { font-size: 17px; font-weight: 300; color: var(--fg-dim); max-width: 640px; }
+  .entry .body p { font-size: 17px; font-weight: 400; color: var(--fg-dim); max-width: 640px; }
   .entry .stack {
     display: flex;
     flex-wrap: wrap;
@@ -376,7 +374,7 @@
     color: var(--magenta);
     margin-bottom: 16px;
   }
-  .featured p { font-size: 17px; font-weight: 300; color: var(--fg-dim); max-width: 760px; }
+  .featured p { font-size: 17px; font-weight: 400; color: var(--fg-dim); max-width: 760px; }
   .badges { display: flex; gap: 10px; margin: 24px 0 16px; flex-wrap: wrap; }
   .badge {
     font-family: var(--util);
@@ -472,7 +470,7 @@
     line-height: 0;
   }
   .gis-figure img { width: 100%; height: auto; display: block; }
-  .entry .gis-figure { max-width: 640px; }
+  .entry .gis-figure { max-width: 680px; margin-left: auto; margin-right: auto; }
 
   .ops-grid {
     display: grid;
@@ -500,7 +498,7 @@
     letter-spacing: -0.02em;
     margin: 9px 0 5px;
   }
-  .op p { font-size: 15px; font-weight: 300; color: var(--fg-dim); line-height: 1.5; }
+  .op p { font-size: 15px; font-weight: 400; color: var(--fg-dim); line-height: 1.5; }
 
   .cred-grid {
     display: grid;
@@ -554,7 +552,7 @@
     margin: 18px 0 22px;
   }
   .contact h2 .accent { color: var(--magenta); }
-  .contact p { color: var(--fg-dim); font-weight: 300; max-width: 500px; margin: 0 auto 36px; }
+  .contact p { color: var(--fg-dim); font-weight: 400; max-width: 500px; margin: 0 auto 36px; }
 
   footer.foot {
     border-top: 1px solid var(--line);
@@ -587,7 +585,7 @@
     .gis-panel { border-left: none; border-top: 1px solid var(--line-soft); }
     .ops-grid { grid-template-columns: repeat(2, 1fr); }
     .cred-grid { grid-template-columns: 1fr; gap: 36px; }
-    .entry { grid-template-columns: 1fr; gap: 12px; }
+    .entry { grid-template-columns: 1fr; gap: 12px; padding: 26px 22px; }
     .ft-body { padding: 32px 24px; }
     .nav-links {
       position: fixed;
@@ -620,8 +618,6 @@
     body { font-size: 17.5px; }
     .ops-grid { grid-template-columns: 1fr; }
     .telemetry { grid-template-columns: 1fr; }
-    .telemetry .cell { border-right: none; border-bottom: 1px solid var(--line-soft); }
-    .telemetry .cell:last-child { border-bottom: none; }
     .topo-bg { opacity: 0.20; }
   }
 
