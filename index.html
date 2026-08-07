@@ -351,7 +351,7 @@
       radial-gradient(120% 140% at 88% 0%, rgba(240,168,56,0.09), transparent 55%),
       var(--ink-2);
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 1fr;
     overflow: hidden;
     margin-bottom: 40px;
   }
@@ -419,16 +419,13 @@
     background:
       radial-gradient(circle at 50% 50%, rgba(69,196,176,0.06), transparent 60%),
       #0b1117;
-    border-left: 1px solid var(--line-soft);
+    border-top: 1px solid var(--line-soft);
     display: flex; align-items: center; justify-content: center;
-    min-height: 300px;
     overflow: hidden;
   }
   .ft-visual svg { width: 90%; max-width: 360px; }
   .ft-visual video {
-    width: 100%; height: 100%;
-    position: absolute; inset: 0;
-    object-fit: contain;
+    width: 100%; height: auto;
     display: block;
   }
   .ft-link { margin-top: 6px; }
@@ -587,7 +584,6 @@
     .brand .logo-full { display: none; }
     .brand .logo-mark { display: block; }
     .featured { grid-template-columns: 1fr; }
-    .ft-visual { border-left: none; border-top: 1px solid var(--line-soft); min-height: 230px; }
     .gis { grid-template-columns: 1fr; }
     .gis-panel { border-left: none; border-top: 1px solid var(--line-soft); }
     .ops-grid { grid-template-columns: repeat(2, 1fr); }
