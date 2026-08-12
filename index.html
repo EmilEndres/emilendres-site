@@ -784,6 +784,36 @@
     <div class="log">
       <div class="entry">
         <div class="body">
+          <h3>Survey NOTAM &amp; weather dashboard</h3>
+          <p>An automated pre-flight screening tool for a rolling survey schedule. It
+            reads planned jobs, airframes and thresholds from a spreadsheet, pulls the
+            NATS Full UK PIB NOTAM feed and hourly forecast data, and screens every
+            NOTAM against each site&rsquo;s coordinates, altitude band and time window &mdash;
+            parsing D-field schedules and, where the text allows, the actual Field-E
+            activity circle rather than the much larger Q-line screening radius. Wind
+            and gust limits are applied per airframe, and the whole thing renders as a
+            self-contained HTML dashboard with a traffic-light status per survey and a
+            Leaflet map of sites, activity areas and nearby aerodromes.</p>
+          <p>The classification logic is deliberately conservative: broad administrative
+            and national notices are filtered out so the list stays readable, GNSS
+            interference and low-level military activity are escalated, and a failed
+            feed or parser reports as <em>data unknown</em> rather than green &mdash; an
+            automated screen should never be able to imply clear airspace when it
+            simply failed to look. It is a planning aid that front-loads the routine
+            checks; the official AIS briefing and the operator&rsquo;s own go/no-go
+            decision still stand.</p>
+          <div class="stack"><span>Python</span><span>NATS PIB XML</span><span>Open-Meteo</span><span>Leaflet</span><span>openpyxl</span></div>
+          <figure class="gis-figure" style="margin-top:20px;">
+            <img src="NOTAM_1.png" alt="Survey NOTAM dashboard — status metrics, Leaflet survey map with NOTAM activity area, and list of surveys with operational review items" loading="lazy" />
+          </figure>
+          <figure class="gis-figure" style="margin-top:16px;">
+            <img src="NOTAM_2.png" alt="Survey NOTAM dashboard — upcoming survey table with per-survey NOTAM review cards and hourly weather against aircraft wind limits" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="body">
           <h3>UAV RAMS automation system</h3>
           <p>A browser-based operational safety application that generates site-specific
             UAV Risk Assessments and Method Statements from reusable hazard and control
@@ -847,6 +877,9 @@
             live map overlay, so complex routes can be designed, tuned, and shared
             without leaving the browser.</p>
           <div class="stack"><span>JavaScript</span><span>HTML5</span><span>KMZ / WPML</span><span>Leaflet</span></div>
+          <figure class="gis-figure" style="margin-top:20px;">
+            <img src="WaypointStudio.png" alt="Waypoint Studio — browser-based drone mission planner with map overlay and editable waypoint list" loading="lazy" />
+          </figure>
         </div>
       </div>
 
