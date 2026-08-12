@@ -627,6 +627,64 @@
     .telemetry .v .dot, .scope-sweep, .ft-visual .blip, .ft-tag .live { animation: none; }
     html { scroll-behavior: auto; }
   }
+  /* click-to-zoom lightbox for screenshots */
+  .gis-figure img { cursor: zoom-in; }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: rgba(13, 17, 22, 0.92);
+    cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    background: none;
+    border: 0;
+    color: var(--paper);
+    font-family: var(--util);
+    font-size: 30px;
+    line-height: 1;
+    padding: 6px 10px;
+    cursor: pointer;
+    opacity: 0.75;
+  }
+  .lightbox-close:hover { opacity: 1; }
+  .lightbox-cap {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 70ch;
+    text-align: center;
+    color: var(--paper);
+    font-family: var(--util);
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.7;
+    padding: 0 20px;
+  }
+  @media (max-width: 640px) {
+    .lightbox { padding: 12px; }
+    .lightbox-cap { display: none; }
+  }
+
 </style>
 </head>
 <body>
@@ -1003,6 +1061,12 @@
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">&times;</button>
+  <img id="lightboxImg" src="" alt="" />
+  <p class="lightbox-cap" id="lightboxCap"></p>
+</div>
+
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('#navlinks a').forEach(function(a){
@@ -1010,6 +1074,45 @@
       document.getElementById('navlinks').classList.remove('open');
     });
   });
+
+  // click any screenshot to view it full screen
+  (function () {
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightboxImg');
+    var cap = document.getElementById('lightboxCap');
+    var closeBtn = document.getElementById('lightboxClose');
+    var lastFocus = null;
+
+    function open(source) {
+      lastFocus = source;
+      img.src = source.currentSrc || source.src;
+      img.alt = source.alt || '';
+      cap.textContent = source.alt || '';
+      box.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+
+    function close() {
+      box.classList.remove('open');
+      document.body.style.overflow = '';
+      img.src = '';
+      if (lastFocus) { lastFocus.focus(); }
+    }
+
+    document.querySelectorAll('.gis-figure img').forEach(function (el) {
+      el.tabIndex = 0;
+      el.addEventListener('click', function () { open(el); });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(el); }
+      });
+    });
+
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && box.classList.contains('open')) { close(); }
+    });
+  })();
 </script>
 </body>
 </html>
