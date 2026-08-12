@@ -785,23 +785,11 @@
       <div class="entry">
         <div class="body">
           <h3>Survey NOTAM &amp; weather dashboard</h3>
-          <p>An automated pre-flight screening tool for a rolling survey schedule. It
-            reads planned jobs, airframes and thresholds from a spreadsheet, pulls the
-            NATS Full UK PIB NOTAM feed and hourly forecast data, and screens every
-            NOTAM against each site&rsquo;s coordinates, altitude band and time window &mdash;
-            parsing D-field schedules and, where the text allows, the actual Field-E
-            activity circle rather than the much larger Q-line screening radius. Wind
-            and gust limits are applied per airframe, and the whole thing renders as a
-            self-contained HTML dashboard with a traffic-light status per survey and a
-            Leaflet map of sites, activity areas and nearby aerodromes.</p>
-          <p>The classification logic is deliberately conservative: broad administrative
-            and national notices are filtered out so the list stays readable, GNSS
-            interference and low-level military activity are escalated, and a failed
-            feed or parser reports as <em>data unknown</em> rather than green &mdash; an
-            automated screen should never be able to imply clear airspace when it
-            simply failed to look. It is a planning aid that front-loads the routine
-            checks; the official AIS briefing and the operator&rsquo;s own go/no-go
-            decision still stand.</p>
+          <p>An automated pre-flight screen for a rolling survey schedule. It reads
+            planned jobs and aircraft limits from a spreadsheet, screens the NATS UK
+            NOTAM feed and hourly forecast against each site&rsquo;s position, altitude and
+            time window, and renders a self-contained dashboard with a traffic-light
+            status per survey. A failed feed reports as data unknown, never green.</p>
           <div class="stack"><span>Python</span><span>NATS PIB XML</span><span>Open-Meteo</span><span>Leaflet</span><span>openpyxl</span></div>
           <figure class="gis-figure" style="margin-top:20px;">
             <img src="NOTAM_1.png" alt="Survey NOTAM dashboard — status metrics, Leaflet survey map with NOTAM activity area, and list of surveys with operational review items" loading="lazy" />
