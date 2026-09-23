@@ -685,11 +685,6 @@
     .lightbox-cap { display: none; }
   }
 
-  /* two screenshots side by side inside an entry */
-  .fig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .entry .fig-row .gis-figure { max-width: none; margin: 0; }
-  @media (max-width: 880px) { .fig-row { grid-template-columns: 1fr; } }
-
 </style>
 </head>
 <body>
@@ -845,33 +840,6 @@
     </div>
 
     <div class="log">
-      <div class="entry">
-        <div class="body">
-          <h3>Deployment readiness &amp; asset tracker</h3>
-          <p>A deployment logistics tool for keeping field equipment accountable and
-            deployment-ready across UK and international operations. Every item is
-            tracked by serial, serviceability, location, firmware and battery cycles. Build a manifest for a deployment and
-            it checks readiness against the dates &mdash; serviceability, maintenance falling
-            due, configuration baseline, battery health, double-booked kit, safety
-            equipment, a customs list for overseas trips and a lithium dangerous-goods
-            summary. Kit is then issued out, recovered to inspection and returned to
-            stores, with a full audit trail.</p>
-          <div class="stack"><span>JavaScript</span><span>HTML5</span><span>CSS</span><span>Asset accountability</span><span>Configuration control</span></div>
-          <p class="ft-link"><a href="readiness-demo.html" target="_blank" rel="noopener">Open the live demo &rarr;</a></p>
-          <figure class="gis-figure" style="margin-top:20px; max-width:none;">
-            <img src="readiness-overview.png" alt="Readiness overview &mdash; operational availability, availability by category, upcoming deployments with readiness status and items needing attention" loading="lazy" />
-          </figure>
-          <div class="fig-row">
-            <figure class="gis-figure">
-              <img src="readiness-manifest.png" alt="Deployment manifest &mdash; readiness checks, verdict stamp, kit list with per-item issues and items available in stores" loading="lazy" />
-            </figure>
-            <figure class="gis-figure">
-              <img src="readiness-register.png" alt="Asset register &mdash; serials, status, location, firmware and battery cycles, with an item's detail and history drawer open" loading="lazy" />
-            </figure>
-          </div>
-        </div>
-      </div>
-
       <div class="entry">
         <div class="body">
           <h3>Survey NOTAM &amp; weather dashboard</h3>

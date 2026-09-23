@@ -8,29 +8,26 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 
 <style>
   :root {
-    /* sectional chart palette */
-    --paper:      #e6e4d8;
-    --paper-2:    #eeece2;
-    --panel:      #f4f2ea;
-    --plate:      #0d1116;   /* dark plate behind dark screenshots/video */
-    --line:       #c3c0b0;
-    --line-soft:  #d5d2c4;
-    --fg:         #1c231f;
-    --fg-dim:     #394037;
-    --fg-faint:   #6f7669;
-    --magenta:    #a32e6e;   /* airspace boundary */
-    --magenta-lo: #ddb6cb;
-    --blue:       #2f5f8c;   /* chart blue */
+    --ink:        #0d141a;
+    --ink-2:      #111b23;
+    --panel:      #15212b;
+    --line:       #25333f;
+    --line-soft:  #1c2832;
+    --fg:         #e9eef3;
+    --fg-dim:     #93a3b1;
+    --fg-faint:   #5d6e7b;
+    --amber:      #f0a838;
+    --teal:       #45c4b0;
+    --amber-dim:  #6b4f24;
 
     --maxw: 1140px;
-    --display: "Archivo", system-ui, sans-serif;
-    --body: "Newsreader", Georgia, serif;
-    --util: "Archivo", system-ui, sans-serif;
-    --mono: "DM Mono", ui-monospace, monospace;
+    --display: "Saira", system-ui, sans-serif;
+    --body: "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,10 +35,10 @@
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--paper);
+    background: var(--ink);
     color: var(--fg);
     font-family: var(--body);
-    font-size: 19px;
+    font-size: 17px;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
@@ -49,82 +46,72 @@
 
   a { color: inherit; text-decoration: none; }
 
-  ::selection { background: var(--magenta); color: var(--paper); }
-
-  /* full-page topographic base map */
-  .topo-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: url("topo.svg") center center / cover no-repeat;
-    opacity: 0.30;
-  }
-
-  section, footer.foot { position: relative; z-index: 1; }
+  ::selection { background: var(--amber); color: var(--ink); }
 
   .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
   .eyebrow {
-    font-family: var(--util);
-    font-weight: 600;
-    font-size: 11.5px;
-    letter-spacing: 0.18em;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--blue);
+    color: var(--teal);
     display: inline-flex;
     align-items: center;
     gap: 10px;
   }
   .eyebrow::before {
     content: "";
-    width: 24px;
+    width: 22px;
     height: 1px;
-    background: var(--blue);
-    opacity: 0.8;
+    background: var(--teal);
+    opacity: 0.7;
   }
 
   header.nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 50;
-    background: rgba(230, 228, 216, 0.88);
+    background: rgba(13, 20, 26, 0.78);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-soft);
   }
   .nav-inner {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 10px 24px;
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
   }
-  /* logo artwork is light-on-dark, so it sits on its own ink chip */
   .brand {
-    background: var(--fg);
-    border-radius: 10px;
-    padding: 5px 12px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.04em;
     display: flex;
     align-items: center;
     gap: 11px;
   }
   .brand img { display: block; width: auto; }
-  .brand .logo-full { height: 36px; }
-  .brand .logo-mark { height: 32px; display: none; }
+  .brand .logo-full { height: 44px; }
+  .brand .logo-mark { height: 40px; display: none; }
+  .brand .tag {
+    width: 11px; height: 11px;
+    border: 1.5px solid var(--amber);
+    border-radius: 2px;
+    transform: rotate(45deg);
+  }
   .nav-links { display: flex; gap: 30px; }
   .nav-links a {
-    font-family: var(--util);
-    font-weight: 500;
+    font-family: var(--mono);
     font-size: 12.5px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     color: var(--fg-dim);
-    padding-bottom: 2px;
-    border-bottom: 1px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.2s;
   }
-  .nav-links a:hover { color: var(--fg); border-bottom-color: var(--magenta); }
+  .nav-links a:hover { color: var(--amber); }
   .nav-toggle { display: none; }
 
   .hero {
@@ -135,42 +122,65 @@
     padding: 120px 0 70px;
     overflow: hidden;
   }
-  /* sectional overlay: graticule + dashed airspace boundaries */
-  .chart-lines {
+  .grid-bg {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.5;
+    mask-image: radial-gradient(ellipse 90% 80% at 70% 40%, #000 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 70% 40%, #000 30%, transparent 80%);
   }
+  .contour {
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .sweep {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1400px; height: 1400px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .sweep circle { fill: none; stroke: var(--line); stroke-width: 1; }
+  .sweep .ping {
+    fill: none;
+    stroke: var(--teal);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 10;
+    transform-origin: 700px 700px;
+    animation: spin 22s linear infinite;
+    opacity: 0.55;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .hero-content { position: relative; z-index: 2; max-width: 760px; }
 
   .hero h1 {
     font-family: var(--display);
-    font-weight: 800;
+    font-weight: 700;
     font-size: clamp(44px, 8vw, 86px);
-    line-height: 0.96;
-    letter-spacing: -0.035em;
-    margin: 22px 0 12px;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    margin: 22px 0 10px;
   }
-  .hero h1 .accent { color: var(--fg); }
+  .hero h1 .accent { color: var(--amber); }
   .hero .role {
     font-family: var(--display);
-    font-weight: 600;
-    font-size: clamp(18px, 3vw, 25px);
-    color: var(--fg);
-    line-height: 1.22;
-    letter-spacing: -0.02em;
-    margin-bottom: 26px;
-    max-width: 660px;
+    font-weight: 500;
+    font-size: clamp(18px, 3vw, 24px);
+    color: var(--fg-dim);
+    letter-spacing: 0.01em;
+    margin-bottom: 30px;
   }
   .hero .lede {
-    font-size: 19.5px;
-    font-weight: 400;
+    font-size: 18px;
     color: var(--fg-dim);
-    max-width: 580px;
+    max-width: 560px;
     margin-bottom: 38px;
   }
 
@@ -179,20 +189,24 @@
     grid-template-columns: 1fr 1fr;
     gap: 0;
     border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--panel);
+    border-radius: 6px;
+    background: rgba(17, 27, 35, 0.6);
     margin-bottom: 40px;
     overflow: hidden;
   }
   .telemetry .cell {
-    padding: 16px 22px;
+    padding: 13px 20px;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
   }
-  .telemetry .cell:nth-child(3) { grid-column: 1 / -1; padding-top: 6px; }
-  .tele-link { color: var(--blue); text-decoration: none; }
+  .telemetry .cell:nth-child(even) { border-right: none; }
+  .telemetry .cell:nth-last-child(-n+2) { border-bottom: none; }
+  /* 3-cell layout: Platform spans the full second row */
+  .telemetry .cell:nth-child(3) { grid-column: 1 / -1; border-right: none; border-bottom: none; }
+  .tele-link { color: #45c4b0; text-decoration: none; }
   .tele-link:hover { text-decoration: underline; }
   .telemetry .k {
-    font-family: var(--util);
-    font-weight: 600;
+    font-family: var(--mono);
     font-size: 10.5px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -202,24 +216,23 @@
   }
   .telemetry .v {
     font-family: var(--mono);
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--fg);
   }
   .telemetry .v .dot {
-    color: var(--blue);
+    color: var(--teal);
     animation: blink 2.4s ease-in-out infinite;
   }
   @keyframes blink { 50% { opacity: 0.25; } }
 
   .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
   .btn {
-    font-family: var(--util);
-    font-weight: 600;
+    font-family: var(--mono);
     font-size: 13px;
-    letter-spacing: 0.02em;
-    padding: 12px 24px;
-    border-radius: 10px;
-    border: 1px solid var(--fg);
+    letter-spacing: 0.06em;
+    padding: 13px 24px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
     color: var(--fg);
     transition: all 0.2s;
     display: inline-flex;
@@ -227,27 +240,28 @@
     gap: 9px;
   }
   .btn.primary {
-    background: var(--fg);
-    color: var(--paper);
-    border-color: var(--fg);
+    background: var(--amber);
+    color: var(--ink);
+    border-color: var(--amber);
+    font-weight: 500;
   }
-  .btn.primary:hover { background: var(--magenta); border-color: var(--magenta); color: var(--paper); }
-  .btn:hover { border-color: var(--magenta); color: var(--magenta); }
+  .btn.primary:hover { background: #ffb94f; }
+  .btn:hover { border-color: var(--amber); color: var(--amber); }
+  .btn.primary:hover { color: var(--ink); }
 
-  section { padding: 100px 0; }
-  .section-head { margin-bottom: 52px; max-width: 660px; }
+  section { padding: 100px 0; position: relative; }
+  .section-head { margin-bottom: 52px; max-width: 640px; }
   .section-head h2 {
     font-family: var(--display);
-    font-weight: 800;
+    font-weight: 600;
     font-size: clamp(28px, 4.5vw, 42px);
-    line-height: 1.06;
+    line-height: 1.08;
     margin: 16px 0 14px;
-    letter-spacing: -0.032em;
+    letter-spacing: -0.01em;
   }
-  .section-head p { color: var(--fg-dim); font-weight: 400; }
+  .section-head p { color: var(--fg-dim); }
 
-  /* dashed airspace boundary as the section rule */
-  .divider { border-top: 1px dashed rgba(163, 46, 110, 0.5); }
+  .divider { border-top: 1px solid var(--line-soft); }
 
   .caps {
     display: grid;
@@ -256,56 +270,65 @@
   }
   .cap {
     background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 28px 26px;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 30px 26px;
     transition: border-color 0.25s, transform 0.25s;
   }
-  .cap:hover { border-color: var(--magenta); transform: translateY(-3px); }
+  .cap:hover { border-color: var(--amber-dim); transform: translateY(-3px); }
+  .cap .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+  }
   .cap h3 {
     font-family: var(--display);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 21px;
-    letter-spacing: -0.02em;
-    margin: 0 0 12px;
+    margin: 14px 0 12px;
   }
-  .cap p { font-size: 16.5px; font-weight: 400; color: var(--fg-dim); line-height: 1.6; }
+  .cap p { font-size: 15px; color: var(--fg-dim); line-height: 1.6; }
   .cap ul {
     list-style: none;
-    margin-top: 18px;
+    margin-top: 16px;
     border-top: 1px solid var(--line-soft);
     padding-top: 14px;
   }
   .cap li {
-    font-family: var(--util);
+    font-family: var(--mono);
     font-size: 12.5px;
-    letter-spacing: 0.01em;
     color: var(--fg-faint);
-    padding: 3.5px 0;
+    padding: 3px 0;
   }
-  .cap li::before { content: "› "; color: var(--magenta); }
+  .cap li::before { content: "› "; color: var(--teal); }
 
-  .log { display: grid; gap: 18px; }
+  .log { border-top: 1px solid var(--line); }
   .entry {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 130px 1fr auto;
     gap: 28px;
     align-items: start;
-    padding: 32px 34px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    transition: border-color 0.25s, transform 0.25s;
+    padding: 30px 6px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background 0.2s;
   }
-  .entry:hover { border-color: var(--magenta); transform: translateY(-2px); }
+  .entry:hover { background: rgba(21, 33, 43, 0.5); }
+  .entry .meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg-faint);
+    letter-spacing: 0.05em;
+    padding-top: 4px;
+  }
+  .entry .meta .id { color: var(--amber); display: block; margin-bottom: 6px; }
   .entry .body h3 {
     font-family: var(--display);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 22px;
-    letter-spacing: -0.022em;
     margin-bottom: 8px;
   }
-  .entry .body p { font-size: 17px; font-weight: 400; color: var(--fg-dim); max-width: 640px; }
+  .entry .body p { font-size: 15.5px; color: var(--fg-dim); max-width: 620px; }
   .entry .stack {
     display: flex;
     flex-wrap: wrap;
@@ -313,22 +336,20 @@
     margin-top: 14px;
   }
   .entry .stack span {
-    font-family: var(--util);
-    font-size: 11.5px;
-    letter-spacing: 0.02em;
+    font-family: var(--mono);
+    font-size: 11px;
     color: var(--fg-dim);
-    background: var(--paper-2);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 3px 9px;
   }
 
   .featured {
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 12px;
     background:
-      radial-gradient(120% 140% at 88% 0%, rgba(163, 46, 110, 0.10), transparent 55%),
-      var(--panel);
+      radial-gradient(120% 140% at 88% 0%, rgba(240,168,56,0.09), transparent 55%),
+      var(--ink-2);
     display: grid;
     grid-template-columns: 1fr;
     overflow: hidden;
@@ -336,13 +357,12 @@
   }
   .ft-body { padding: 40px 38px; }
   .ft-tag {
-    font-family: var(--util);
-    font-weight: 600;
+    font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--magenta);
-    border: 1px solid var(--magenta-lo);
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
     border-radius: 999px;
     padding: 5px 13px;
     display: inline-flex;
@@ -351,58 +371,55 @@
   }
   .ft-tag .live {
     width: 7px; height: 7px; border-radius: 50%;
-    background: var(--blue);
+    background: var(--teal);
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(47, 95, 140, 0.5); }
-    70%  { box-shadow: 0 0 0 8px rgba(47, 95, 140, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(47, 95, 140, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(69,196,176,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(69,196,176,0); }
+    100% { box-shadow: 0 0 0 0 rgba(69,196,176,0); }
   }
   .featured h3 {
     font-family: var(--display);
-    font-weight: 800;
+    font-weight: 700;
     font-size: clamp(30px, 4.5vw, 44px);
-    letter-spacing: -0.03em;
-    margin: 20px 0 6px;
+    letter-spacing: 0.03em;
+    margin: 20px 0 4px;
   }
   .ft-sub {
-    font-family: var(--body);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 19.5px;
-    color: var(--magenta);
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--fg-dim);
     margin-bottom: 16px;
   }
-  .featured p { font-size: 17px; font-weight: 400; color: var(--fg-dim); max-width: 760px; }
+  .featured p { font-size: 15.5px; color: var(--fg-dim); max-width: 760px; }
   .badges { display: flex; gap: 10px; margin: 24px 0 16px; flex-wrap: wrap; }
   .badge {
-    font-family: var(--util);
+    font-family: var(--mono);
     font-size: 12px;
-    letter-spacing: 0.02em;
     color: var(--fg);
-    background: var(--paper-2);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 8px 14px;
     display: inline-flex; align-items: center; gap: 9px;
   }
-  .badge .ic { color: var(--blue); font-size: 9px; }
+  .badge .ic { color: var(--teal); font-size: 9px; }
   .ft-stack { display: flex; flex-wrap: wrap; gap: 7px; }
   .ft-stack span {
-    font-family: var(--util);
-    font-size: 11.5px;
-    letter-spacing: 0.02em;
+    font-family: var(--mono);
+    font-size: 11px;
     color: var(--fg-dim);
-    background: var(--paper-2);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 3px 9px;
   }
   .ft-visual {
     position: relative;
-    background: var(--plate);
-    border-top: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(69,196,176,0.06), transparent 60%),
+      #0b1117;
+    border-top: 1px solid var(--line-soft);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
@@ -411,31 +428,28 @@
     width: 100%; height: auto;
     display: block;
   }
-  .ft-link { margin-top: 8px; }
+  .ft-link { margin-top: 6px; }
   .ft-link a {
-    color: var(--magenta);
-    font-family: var(--util);
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.02em;
-    border-bottom: 1px solid currentColor;
+    color: #45c4b0; text-decoration: none; font-weight: 600;
+    font-size: 15px; letter-spacing: 0.02em;
   }
-  .ft-link a:hover { color: var(--fg); }
+  .ft-link a:hover { text-decoration: underline; }
   .scope-sweep { transform-origin: 200px 200px; animation: spin 8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
   .ft-visual .blip { animation: blink 2.4s ease-in-out infinite; }
 
   .gis {
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     display: grid;
     grid-template-columns: 1.3fr 0.7fr;
-    background: var(--panel);
+    background: var(--ink-2);
   }
   .gis-map {
     position: relative;
-    background: var(--plate);
+    background:
+      radial-gradient(circle at 50% 42%, rgba(69,196,176,0.05), transparent 65%),
+      #0b1117;
     padding: 18px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -445,32 +459,31 @@
   .layer {
     display: flex; align-items: center; gap: 11px;
     padding: 9px 0; border-bottom: 1px solid var(--line-soft);
-    font-family: var(--util); font-size: 12.5px; color: var(--fg-dim);
+    font-family: var(--mono); font-size: 12.5px; color: var(--fg-dim);
   }
   .layer:last-of-type { border-bottom: none; }
-  .layer .chk { color: var(--blue); font-size: 12px; }
-  .layer .sw { width: 14px; height: 14px; border-radius: 5px; flex: none; }
+  .layer .chk { color: var(--teal); font-size: 12px; }
+  .layer .sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
   .layer em { color: var(--fg-faint); font-style: normal; }
   .gis-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
-  .stat { border: 1px solid var(--line-soft); border-radius: 10px; padding: 12px 14px; }
+  .stat { border: 1px solid var(--line-soft); border-radius: 7px; padding: 12px 14px; }
   .stat .k {
-    font-family: var(--util); font-weight: 600; font-size: 10px; letter-spacing: 0.14em;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--fg-faint); display: block; margin-bottom: 5px;
   }
-  .stat .v { font-family: var(--mono); font-size: 15px; color: var(--fg); }
-  .stat .v small { color: var(--blue); font-size: 11px; }
+  .stat .v { font-family: var(--mono); font-size: 16px; color: var(--fg); }
+  .stat .v small { color: var(--teal); font-size: 11px; }
 
-  /* dark plates: the screenshots are light-on-dark artwork */
   .gis-figure {
     margin: 0;
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
-    background: var(--plate);
+    background: #0b1117;
     line-height: 0;
   }
   .gis-figure img { width: 100%; height: auto; display: block; }
-  .entry .gis-figure { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .entry .gis-figure { max-width: 620px; }
 
   .ops-grid {
     display: grid;
@@ -478,27 +491,24 @@
     gap: 16px;
   }
   .op {
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 22px 20px;
-    background: var(--panel);
-    transition: border-color 0.25s;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 24px 22px;
+    background: var(--ink-2);
   }
-  .op:hover { border-color: var(--magenta); }
   .op .coord {
     font-family: var(--mono);
     font-size: 11px;
-    color: var(--blue);
-    letter-spacing: 0.02em;
+    color: var(--teal);
+    letter-spacing: 0.04em;
   }
   .op h4 {
     font-family: var(--display);
-    font-weight: 700;
-    font-size: 18.5px;
-    letter-spacing: -0.02em;
-    margin: 9px 0 5px;
+    font-weight: 600;
+    font-size: 19px;
+    margin: 10px 0 6px;
   }
-  .op p { font-size: 15px; font-weight: 400; color: var(--fg-dim); line-height: 1.5; }
+  .op p { font-size: 13.5px; color: var(--fg-dim); }
 
   .cred-grid {
     display: grid;
@@ -515,29 +525,25 @@
     padding: 15px 0;
     border-bottom: 1px solid var(--line-soft);
   }
-  .cred .name { font-size: 17px; font-weight: 400; }
+  .cred .name { font-size: 15.5px; }
   .cred .issuer {
-    font-family: var(--util);
-    font-weight: 600;
-    font-size: 11px;
-    color: var(--blue);
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
     white-space: nowrap;
   }
   .stack-cloud { display: flex; flex-wrap: wrap; gap: 9px; align-content: flex-start; }
   .stack-cloud span {
-    font-family: var(--util);
+    font-family: var(--mono);
     font-size: 12.5px;
-    letter-spacing: 0.02em;
     color: var(--fg-dim);
-    background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 7px 13px;
     transition: all 0.2s;
   }
-  .stack-cloud span:hover { border-color: var(--magenta); color: var(--magenta); }
+  .stack-cloud span:hover { border-color: var(--teal); color: var(--teal); }
 
   .contact {
     text-align: center;
@@ -545,17 +551,16 @@
   }
   .contact h2 {
     font-family: var(--display);
-    font-weight: 800;
+    font-weight: 700;
     font-size: clamp(34px, 6vw, 60px);
-    line-height: 1.0;
-    letter-spacing: -0.035em;
+    line-height: 1.02;
     margin: 18px 0 22px;
   }
-  .contact h2 .accent { color: var(--magenta); }
-  .contact p { color: var(--fg-dim); font-weight: 400; max-width: 500px; margin: 0 auto 36px; }
+  .contact h2 .accent { color: var(--amber); }
+  .contact p { color: var(--fg-dim); max-width: 480px; margin: 0 auto 36px; }
 
   footer.foot {
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--line-soft);
     padding: 26px 0;
   }
   .foot-inner {
@@ -564,20 +569,18 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    font-family: var(--util);
-    font-size: 11.5px;
+    font-family: var(--mono);
+    font-size: 12px;
     color: var(--fg-faint);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
   }
-  .foot-inner a:hover { color: var(--magenta); }
+  .foot-inner a:hover { color: var(--amber); }
   .foot-mark { display: flex; align-items: center; gap: 10px; }
-  .foot-mark img {
-    height: 24px; width: auto; display: block;
-    background: var(--fg); padding: 4px 5px; border-radius: 8px;
-  }
+  .foot-mark img { height: 26px; width: auto; display: block; opacity: 0.9; }
 
   @media (max-width: 880px) {
     .caps { grid-template-columns: 1fr; }
+    .sweep { display: none; }
     .brand .logo-full { display: none; }
     .brand .logo-mark { display: block; }
     .featured { grid-template-columns: 1fr; }
@@ -585,15 +588,14 @@
     .gis-panel { border-left: none; border-top: 1px solid var(--line-soft); }
     .ops-grid { grid-template-columns: repeat(2, 1fr); }
     .cred-grid { grid-template-columns: 1fr; gap: 36px; }
-    .entry { grid-template-columns: 1fr; gap: 12px; padding: 26px 22px; }
-    .ft-body { padding: 32px 24px; }
+    .entry { grid-template-columns: 1fr; gap: 12px; }
     .nav-links {
       position: fixed;
-      top: 60px; right: 0;
+      top: 57px; right: 0;
       flex-direction: column;
-      background: var(--panel);
+      background: var(--ink-2);
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 18px 22px;
       gap: 18px;
       transform: translateX(120%);
@@ -604,97 +606,29 @@
       display: block;
       background: none;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 5px;
       color: var(--fg);
-      font-family: var(--util);
-      font-weight: 600;
+      font-family: var(--mono);
       font-size: 12px;
-      letter-spacing: 0.08em;
       padding: 8px 12px;
       cursor: pointer;
     }
   }
   @media (max-width: 520px) {
-    body { font-size: 17.5px; }
+    body { font-size: 16px; }
     .ops-grid { grid-template-columns: 1fr; }
     .telemetry { grid-template-columns: 1fr; }
-    .topo-bg { opacity: 0.20; }
+    .telemetry .cell { border-right: none; border-bottom: 1px solid var(--line-soft); }
+    .telemetry .cell:last-child { border-bottom: none; }
   }
-
-  :focus-visible { outline: 2px solid var(--magenta); outline-offset: 3px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .telemetry .v .dot, .scope-sweep, .ft-visual .blip, .ft-tag .live { animation: none; }
+    .sweep .ping, .telemetry .v .dot, .scope-sweep, .ft-visual .blip, .ft-tag .live { animation: none; }
     html { scroll-behavior: auto; }
   }
-  /* click-to-zoom lightbox for screenshots */
-  .gis-figure img { cursor: zoom-in; }
-
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-    background: rgba(13, 17, 22, 0.92);
-    cursor: zoom-out;
-  }
-  .lightbox.open { display: flex; }
-  .lightbox img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 18px;
-    right: 22px;
-    background: none;
-    border: 0;
-    color: var(--paper);
-    font-family: var(--util);
-    font-size: 30px;
-    line-height: 1;
-    padding: 6px 10px;
-    cursor: pointer;
-    opacity: 0.75;
-  }
-  .lightbox-close:hover { opacity: 1; }
-  .lightbox-cap {
-    position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 70ch;
-    text-align: center;
-    color: var(--paper);
-    font-family: var(--util);
-    font-size: 13px;
-    line-height: 1.5;
-    opacity: 0.7;
-    padding: 0 20px;
-  }
-  @media (max-width: 640px) {
-    .lightbox { padding: 12px; }
-    .lightbox-cap { display: none; }
-  }
-
-  /* two screenshots side by side inside an entry */
-  .fig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .entry .fig-row .gis-figure { max-width: none; margin: 0; }
-  @media (max-width: 880px) { .fig-row { grid-template-columns: 1fr; } }
-
 </style>
 </head>
 <body>
-
-<div class="topo-bg" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="nav-inner">
@@ -715,17 +649,19 @@
 </header>
 
 <section class="hero" id="top">
-  <svg class="chart-lines" aria-hidden="true" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 800">
-    <defs>
-      <pattern id="graticule" width="60" height="60" patternUnits="userSpaceOnUse">
-        <path d="M60 0H0V60" fill="none" stroke="#1c231f" stroke-width="0.5" opacity="0.10"/>
-      </pattern>
-    </defs>
-    <rect width="1200" height="800" fill="url(#graticule)"/>
-    <circle cx="1010" cy="300" r="250" fill="none" stroke="#a32e6e" stroke-width="2.5" stroke-dasharray="12 10" opacity="0.34"/>
-    <circle cx="1010" cy="300" r="158" fill="none" stroke="#a32e6e" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.26"/>
-    <circle cx="150" cy="690" r="210" fill="none" stroke="#2f5f8c" stroke-width="1.5" stroke-dasharray="3 7" opacity="0.24"/>
-    <path d="M-20 588 C 240 540, 470 630, 760 566 S 1120 486, 1240 528" fill="none" stroke="#2f5f8c" stroke-width="1.2" opacity="0.22"/>
+  <div class="grid-bg"></div>
+  <svg class="contour" preserveAspectRatio="none" viewBox="0 0 1200 800">
+    <g fill="none" stroke="#45c4b0" stroke-width="1">
+      <path d="M-50,560 C200,500 350,620 600,560 S1000,460 1260,520" opacity="0.5"/>
+      <path d="M-50,620 C220,560 380,680 620,620 S1010,520 1260,580" opacity="0.35"/>
+      <path d="M-50,680 C240,620 400,740 640,680 S1020,580 1260,640" opacity="0.25"/>
+    </g>
+  </svg>
+  <svg class="sweep" viewBox="0 0 1400 1400">
+    <circle cx="700" cy="700" r="300"/>
+    <circle cx="700" cy="700" r="480"/>
+    <circle cx="700" cy="700" r="660"/>
+    <circle class="ping" cx="700" cy="700" r="480"/>
   </svg>
 
   <div class="wrap hero-content">
@@ -741,7 +677,7 @@
     <div class="telemetry">
       <div class="cell">
         <span class="k">Base</span>
-        <span class="v">52.3989°N&nbsp;&nbsp;0.2622°E</span>
+        <span class="v">52.2053°N&nbsp;&nbsp;0.1218°E</span>
       </div>
       <div class="cell">
         <span class="k">Sector</span>
@@ -771,6 +707,7 @@
 
     <div class="caps">
       <div class="cap">
+        <span class="num">01</span>
         <h3>Flight Operations</h3>
         <p>Automated and crewed missions for large-scale survey work, planned for
           terrain, obstacles, and the data the analysis actually needs.</p>
@@ -782,6 +719,7 @@
         </ul>
       </div>
       <div class="cap">
+        <span class="num">02</span>
         <h3>Geospatial Data</h3>
         <p>Turning raw imagery and point clouds into clean, decision-ready layers
           for analysts and operators.</p>
@@ -793,6 +731,7 @@
         </ul>
       </div>
       <div class="cap">
+        <span class="num">03</span>
         <h3>Software &amp; Pipelines</h3>
         <p>Python tooling that ties capture to the dashboard — repeatable,
           documented, and built to run unattended.</p>
@@ -846,67 +785,7 @@
 
     <div class="log">
       <div class="entry">
-        <div class="body">
-          <h3>Deployment readiness &amp; asset tracker</h3>
-          <p>A deployment logistics tool for keeping field equipment accountable and
-            deployment-ready across UK and international operations. Every item is
-            tracked by serial, serviceability, location, firmware and battery cycles. Build a manifest for a deployment and
-            it checks readiness against the dates &mdash; serviceability, maintenance falling
-            due, configuration baseline, battery health, double-booked kit, safety
-            equipment, a customs list for overseas trips and a lithium dangerous-goods
-            summary. Kit is then issued out, recovered to inspection and returned to
-            stores, with a full audit trail.</p>
-          <div class="stack"><span>JavaScript</span><span>HTML5</span><span>CSS</span><span>Asset accountability</span><span>Configuration control</span></div>
-          <p class="ft-link"><a href="readiness-demo.html" target="_blank" rel="noopener">Open the live demo &rarr;</a></p>
-          <figure class="gis-figure" style="margin-top:20px; max-width:none;">
-            <img src="readiness-overview.png" alt="Readiness overview &mdash; operational availability, availability by category, upcoming deployments with readiness status and items needing attention" loading="lazy" />
-          </figure>
-          <div class="fig-row">
-            <figure class="gis-figure">
-              <img src="readiness-manifest.png" alt="Deployment manifest &mdash; readiness checks, verdict stamp, kit list with per-item issues and items available in stores" loading="lazy" />
-            </figure>
-            <figure class="gis-figure">
-              <img src="readiness-register.png" alt="Asset register &mdash; serials, status, location, firmware and battery cycles, with an item's detail and history drawer open" loading="lazy" />
-            </figure>
-          </div>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="body">
-          <h3>Survey NOTAM &amp; weather dashboard</h3>
-          <p>An automated pre-flight screen for a rolling survey schedule. It reads
-            planned jobs and aircraft limits from a spreadsheet, screens the NATS UK
-            NOTAM feed and hourly forecast against each site&rsquo;s position, altitude and
-            time window, and renders a self-contained dashboard with a traffic-light
-            status per survey. A failed feed reports as data unknown, never green.</p>
-          <div class="stack"><span>Python</span><span>NATS PIB XML</span><span>Open-Meteo</span><span>Leaflet</span><span>openpyxl</span></div>
-          <figure class="gis-figure" style="margin-top:20px;">
-            <img src="NOTAM_1.png" alt="Survey NOTAM dashboard — status metrics, Leaflet survey map with NOTAM activity area, and list of surveys with operational review items" loading="lazy" />
-          </figure>
-          <figure class="gis-figure" style="margin-top:16px;">
-            <img src="NOTAM_2.png" alt="Survey NOTAM dashboard — upcoming survey table with per-survey NOTAM review cards and hourly weather against aircraft wind limits" loading="lazy" />
-          </figure>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="body">
-          <h3>UAV RAMS automation system</h3>
-          <p>A browser-based operational safety application that generates site-specific
-            UAV Risk Assessments and Method Statements from reusable hazard and control
-            libraries, driven by conditional inputs about the operation. Risk scoring,
-            revision control, an approval workflow, and print-ready PDF output &mdash; so a
-            compliant RAMS for a new site is a few minutes of structured input rather
-            than an afternoon of copy-paste.</p>
-          <div class="stack"><span>Python</span><span>HTML5</span><span>CSS</span><span>JavaScript</span></div>
-          <figure class="gis-figure" style="margin-top:20px;">
-            <img src="rams-generator.png" alt="UAV RAMS generator — project details step with RAMS ID, revision, client, site and scope of works fields" loading="lazy" />
-          </figure>
-        </div>
-      </div>
-
-      <div class="entry">
+        <div class="meta"><span class="id">LOG-001</span>2024–2025</div>
         <div class="body">
           <h3>Automated site digitisation pipeline</h3>
           <p>A Python pipeline that fully digitises a site into discrete, 
@@ -918,6 +797,7 @@
       </div>
 
       <div class="entry">
+        <div class="meta"><span class="id">LOG-002</span>2025</div>
         <div class="body">
           <h3>Cloud survey processing</h3>
           <p>End-to-end processing of aerial surveys on AWS GPU instances —
@@ -928,6 +808,7 @@
       </div>
 
       <div class="entry">
+        <div class="meta"><span class="id">LOG-003</span>2025</div>
         <div class="body">
           <h3>Interactive analytics dashboard</h3>
           <p>An interactive dashboard with editable parameters, tier-based
@@ -938,6 +819,7 @@
       </div>
 
       <div class="entry">
+        <div class="meta"><span class="id">LOG-004</span>2026</div>
         <div class="body">
           <h3>Terrain analysis</h3>
           <p>Interactive Plotly maps visualising slope, elevation, and aspect from
@@ -948,6 +830,7 @@
       </div>
 
       <div class="entry">
+        <div class="meta"><span class="id">LOG-005</span>2026</div>
         <div class="body">
           <h3>Waypoint Studio</h3>
           <p>A browser-based mission-planning tool for building and editing drone
@@ -955,13 +838,11 @@
             live map overlay, so complex routes can be designed, tuned, and shared
             without leaving the browser.</p>
           <div class="stack"><span>JavaScript</span><span>HTML5</span><span>KMZ / WPML</span><span>Leaflet</span></div>
-          <figure class="gis-figure" style="margin-top:20px;">
-            <img src="WaypointStudio.png" alt="Waypoint Studio — browser-based drone mission planner with map overlay and editable waypoint list" loading="lazy" />
-          </figure>
         </div>
       </div>
 
       <div class="entry">
+        <div class="meta"><span class="id">LOG-006</span>2026</div>
         <div class="body">
           <h3>Flight Log &amp; Performance Validation Suite</h3>
           <p>Tooling that parses raw flight logs and geotagged imagery into clear
@@ -1058,7 +939,6 @@
     <div class="cred-grid">
       <div class="cred-list">
         <div class="cred"><span class="name">A2 Certificate of Competency (A2 CofC)</span><span class="issuer">UK CAA</span></div>
-        <div class="cred"><span class="name">Remote Pilot Certificate (Part 107)</span><span class="issuer">FAA</span></div>
         <div class="cred"><span class="name">Certified DJI Dock 2 Engineer</span><span class="issuer">DJI</span></div>
         <div class="cred"><span class="name">BSc Computer Science</span><span class="issuer">ARU CAMBRIDGE</span></div>
         <div class="cred"><span class="name">UK Operator ID &amp; Remote ID</span><span class="issuer">CAA REG</span></div>
@@ -1093,12 +973,6 @@
   </div>
 </footer>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image">
-  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">&times;</button>
-  <img id="lightboxImg" src="" alt="" />
-  <p class="lightbox-cap" id="lightboxCap"></p>
-</div>
-
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('#navlinks a').forEach(function(a){
@@ -1106,45 +980,6 @@
       document.getElementById('navlinks').classList.remove('open');
     });
   });
-
-  // click any screenshot to view it full screen
-  (function () {
-    var box = document.getElementById('lightbox');
-    var img = document.getElementById('lightboxImg');
-    var cap = document.getElementById('lightboxCap');
-    var closeBtn = document.getElementById('lightboxClose');
-    var lastFocus = null;
-
-    function open(source) {
-      lastFocus = source;
-      img.src = source.currentSrc || source.src;
-      img.alt = source.alt || '';
-      cap.textContent = source.alt || '';
-      box.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      closeBtn.focus();
-    }
-
-    function close() {
-      box.classList.remove('open');
-      document.body.style.overflow = '';
-      img.src = '';
-      if (lastFocus) { lastFocus.focus(); }
-    }
-
-    document.querySelectorAll('.gis-figure img').forEach(function (el) {
-      el.tabIndex = 0;
-      el.addEventListener('click', function () { open(el); });
-      el.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(el); }
-      });
-    });
-
-    box.addEventListener('click', close);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && box.classList.contains('open')) { close(); }
-    });
-  })();
 </script>
 </body>
 </html>

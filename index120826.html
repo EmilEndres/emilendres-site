@@ -627,69 +627,6 @@
     .telemetry .v .dot, .scope-sweep, .ft-visual .blip, .ft-tag .live { animation: none; }
     html { scroll-behavior: auto; }
   }
-  /* click-to-zoom lightbox for screenshots */
-  .gis-figure img { cursor: zoom-in; }
-
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-    background: rgba(13, 17, 22, 0.92);
-    cursor: zoom-out;
-  }
-  .lightbox.open { display: flex; }
-  .lightbox img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 18px;
-    right: 22px;
-    background: none;
-    border: 0;
-    color: var(--paper);
-    font-family: var(--util);
-    font-size: 30px;
-    line-height: 1;
-    padding: 6px 10px;
-    cursor: pointer;
-    opacity: 0.75;
-  }
-  .lightbox-close:hover { opacity: 1; }
-  .lightbox-cap {
-    position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 70ch;
-    text-align: center;
-    color: var(--paper);
-    font-family: var(--util);
-    font-size: 13px;
-    line-height: 1.5;
-    opacity: 0.7;
-    padding: 0 20px;
-  }
-  @media (max-width: 640px) {
-    .lightbox { padding: 12px; }
-    .lightbox-cap { display: none; }
-  }
-
-  /* two screenshots side by side inside an entry */
-  .fig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .entry .fig-row .gis-figure { max-width: none; margin: 0; }
-  @media (max-width: 880px) { .fig-row { grid-template-columns: 1fr; } }
-
 </style>
 </head>
 <body>
@@ -847,51 +784,6 @@
     <div class="log">
       <div class="entry">
         <div class="body">
-          <h3>Deployment readiness &amp; asset tracker</h3>
-          <p>A deployment logistics tool for keeping field equipment accountable and
-            deployment-ready across UK and international operations. Every item is
-            tracked by serial, serviceability, location, firmware and battery cycles. Build a manifest for a deployment and
-            it checks readiness against the dates &mdash; serviceability, maintenance falling
-            due, configuration baseline, battery health, double-booked kit, safety
-            equipment, a customs list for overseas trips and a lithium dangerous-goods
-            summary. Kit is then issued out, recovered to inspection and returned to
-            stores, with a full audit trail.</p>
-          <div class="stack"><span>JavaScript</span><span>HTML5</span><span>CSS</span><span>Asset accountability</span><span>Configuration control</span></div>
-          <p class="ft-link"><a href="readiness-demo.html" target="_blank" rel="noopener">Open the live demo &rarr;</a></p>
-          <figure class="gis-figure" style="margin-top:20px; max-width:none;">
-            <img src="readiness-overview.png" alt="Readiness overview &mdash; operational availability, availability by category, upcoming deployments with readiness status and items needing attention" loading="lazy" />
-          </figure>
-          <div class="fig-row">
-            <figure class="gis-figure">
-              <img src="readiness-manifest.png" alt="Deployment manifest &mdash; readiness checks, verdict stamp, kit list with per-item issues and items available in stores" loading="lazy" />
-            </figure>
-            <figure class="gis-figure">
-              <img src="readiness-register.png" alt="Asset register &mdash; serials, status, location, firmware and battery cycles, with an item's detail and history drawer open" loading="lazy" />
-            </figure>
-          </div>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="body">
-          <h3>Survey NOTAM &amp; weather dashboard</h3>
-          <p>An automated pre-flight screen for a rolling survey schedule. It reads
-            planned jobs and aircraft limits from a spreadsheet, screens the NATS UK
-            NOTAM feed and hourly forecast against each site&rsquo;s position, altitude and
-            time window, and renders a self-contained dashboard with a traffic-light
-            status per survey. A failed feed reports as data unknown, never green.</p>
-          <div class="stack"><span>Python</span><span>NATS PIB XML</span><span>Open-Meteo</span><span>Leaflet</span><span>openpyxl</span></div>
-          <figure class="gis-figure" style="margin-top:20px;">
-            <img src="NOTAM_1.png" alt="Survey NOTAM dashboard — status metrics, Leaflet survey map with NOTAM activity area, and list of surveys with operational review items" loading="lazy" />
-          </figure>
-          <figure class="gis-figure" style="margin-top:16px;">
-            <img src="NOTAM_2.png" alt="Survey NOTAM dashboard — upcoming survey table with per-survey NOTAM review cards and hourly weather against aircraft wind limits" loading="lazy" />
-          </figure>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="body">
           <h3>UAV RAMS automation system</h3>
           <p>A browser-based operational safety application that generates site-specific
             UAV Risk Assessments and Method Statements from reusable hazard and control
@@ -955,9 +847,6 @@
             live map overlay, so complex routes can be designed, tuned, and shared
             without leaving the browser.</p>
           <div class="stack"><span>JavaScript</span><span>HTML5</span><span>KMZ / WPML</span><span>Leaflet</span></div>
-          <figure class="gis-figure" style="margin-top:20px;">
-            <img src="WaypointStudio.png" alt="Waypoint Studio — browser-based drone mission planner with map overlay and editable waypoint list" loading="lazy" />
-          </figure>
         </div>
       </div>
 
@@ -1093,12 +982,6 @@
   </div>
 </footer>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image">
-  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">&times;</button>
-  <img id="lightboxImg" src="" alt="" />
-  <p class="lightbox-cap" id="lightboxCap"></p>
-</div>
-
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('#navlinks a').forEach(function(a){
@@ -1106,45 +989,6 @@
       document.getElementById('navlinks').classList.remove('open');
     });
   });
-
-  // click any screenshot to view it full screen
-  (function () {
-    var box = document.getElementById('lightbox');
-    var img = document.getElementById('lightboxImg');
-    var cap = document.getElementById('lightboxCap');
-    var closeBtn = document.getElementById('lightboxClose');
-    var lastFocus = null;
-
-    function open(source) {
-      lastFocus = source;
-      img.src = source.currentSrc || source.src;
-      img.alt = source.alt || '';
-      cap.textContent = source.alt || '';
-      box.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      closeBtn.focus();
-    }
-
-    function close() {
-      box.classList.remove('open');
-      document.body.style.overflow = '';
-      img.src = '';
-      if (lastFocus) { lastFocus.focus(); }
-    }
-
-    document.querySelectorAll('.gis-figure img').forEach(function (el) {
-      el.tabIndex = 0;
-      el.addEventListener('click', function () { open(el); });
-      el.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(el); }
-      });
-    });
-
-    box.addEventListener('click', close);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && box.classList.contains('open')) { close(); }
-    });
-  })();
 </script>
 </body>
 </html>
