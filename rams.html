@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAMS Builder for H&amp;S consultancies — Emil Endres</title>
+<meta name="description" content="Site-specific construction RAMS on your client's letterhead in under 5 minutes, with risk scoring, approval control and revision history. Built for UK health and safety consultancies." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --paper:#e6e4d8; --paper-2:#eeece2; --panel:#f4f2ea; --plate:#0d1116;
+    --line:#c3c0b0; --line-soft:#d5d2c4;
+    --fg:#1c231f; --fg-dim:#394037; --fg-faint:#6f7669;
+    --magenta:#a32e6e; --magenta-lo:#ddb6cb; --blue:#2f5f8c;
+    --maxw:1140px;
+    --display:"Archivo", system-ui, sans-serif; --body:"Newsreader", Georgia, serif;
+    --util:"Archivo", system-ui, sans-serif; --mono:"DM Mono", ui-monospace, monospace;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--paper); color:var(--fg); font-family:var(--body); font-size:19px; line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:inherit; text-decoration:none; }
+  ::selection { background:var(--magenta); color:var(--paper); }
+  .topo-bg { position:fixed; inset:0; z-index:0; pointer-events:none; background:url("topo.svg") center center / cover no-repeat; opacity:0.30; }
+  section, footer.foot { position:relative; z-index:1; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  .eyebrow { font-family:var(--util); font-weight:600; font-size:11.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--blue); display:inline-flex; align-items:center; gap:10px; }
+  .eyebrow::before { content:""; width:24px; height:1px; background:var(--blue); opacity:0.8; }
+
+  header.nav { position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(230,228,216,0.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .nav-inner { max-width:var(--maxw); margin:0 auto; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  .brand { background:var(--fg); border-radius:10px; padding:5px 12px; display:flex; align-items:center; gap:11px; }
+  .brand img { display:block; width:auto; }
+  .brand .logo-full { height:36px; }
+  .brand .logo-mark { height:32px; display:none; }
+  .nav-links { display:flex; gap:30px; }
+  .nav-links a { font-family:var(--util); font-weight:500; font-size:12.5px; letter-spacing:0.06em; color:var(--fg-dim); padding-bottom:2px; border-bottom:1px solid transparent; transition:color .2s, border-color .2s; }
+  .nav-links a:hover { color:var(--fg); border-bottom-color:var(--magenta); }
+  .nav-toggle { display:none; }
+
+  .hero { padding:150px 0 80px; }
+  .hero h1 { font-family:var(--display); font-weight:800; font-size:clamp(42px,7vw,76px); line-height:0.98; letter-spacing:-0.035em; margin:22px 0 14px; }
+  .hero .role { font-family:var(--display); font-weight:600; font-size:clamp(19px,3vw,26px); line-height:1.22; letter-spacing:-0.02em; margin-bottom:22px; max-width:700px; }
+  .hero .lede { font-size:19.5px; color:var(--fg-dim); max-width:640px; margin-bottom:34px; }
+  .cta-row { display:flex; gap:14px; flex-wrap:wrap; }
+  .btn { font-family:var(--util); font-weight:600; font-size:13px; letter-spacing:0.02em; padding:12px 24px; border-radius:10px; border:1px solid var(--fg); color:var(--fg); transition:all .2s; display:inline-flex; align-items:center; gap:9px; }
+  .btn.primary { background:var(--fg); color:var(--paper); }
+  .btn.primary:hover { background:var(--magenta); border-color:var(--magenta); color:var(--paper); }
+  .btn:hover { border-color:var(--magenta); color:var(--magenta); }
+  .note { font-family:var(--util); font-size:13px; color:var(--fg-faint); margin-top:16px; }
+
+  section { padding:90px 0; }
+  .divider { border-top:1px dashed rgba(163,46,110,0.5); }
+  .section-head { margin-bottom:44px; max-width:680px; }
+  .section-head h2 { font-family:var(--display); font-weight:800; font-size:clamp(28px,4.5vw,42px); line-height:1.06; margin:16px 0 14px; letter-spacing:-0.032em; }
+  .section-head p { color:var(--fg-dim); }
+
+  .caps { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .cap { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:28px 26px; transition:border-color .25s, transform .25s; }
+  .cap:hover { border-color:var(--magenta); transform:translateY(-3px); }
+  .cap h3 { font-family:var(--display); font-weight:700; font-size:21px; letter-spacing:-0.02em; margin:0 0 10px; }
+  .cap p { font-size:16.5px; color:var(--fg-dim); line-height:1.6; }
+  .cap ul { list-style:none; margin-top:16px; border-top:1px solid var(--line-soft); padding-top:12px; }
+  .cap li { font-family:var(--util); font-size:12.5px; color:var(--fg-faint); padding:3.5px 0; }
+  .cap li::before { content:"› "; color:var(--magenta); }
+
+  .gis-figure { margin:0; border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--plate); line-height:0; }
+  .gis-figure img { width:100%; height:auto; display:block; cursor:zoom-in; }
+  figcaption { font-family:var(--util); font-size:13px; color:var(--fg-faint); line-height:1.5; margin-top:10px; }
+  .shot { margin-bottom:34px; }
+  .fig-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .step { border:1px solid var(--line); border-radius:14px; padding:22px 20px; background:var(--panel); }
+  .step .n { font-family:var(--mono); font-size:12px; color:var(--blue); }
+  .step h4 { font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:-0.02em; margin:8px 0 5px; }
+  .step p { font-size:15.5px; color:var(--fg-dim); line-height:1.5; }
+
+  .featured { border:1px solid var(--line); border-radius:16px; background:radial-gradient(120% 140% at 88% 0%, rgba(163,46,110,0.10), transparent 55%), var(--panel); padding:40px 38px; }
+  .ft-tag { font-family:var(--util); font-weight:600; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--magenta); border:1px solid var(--magenta-lo); border-radius:999px; padding:5px 13px; display:inline-block; }
+  .featured h3 { font-family:var(--display); font-weight:800; font-size:clamp(26px,4vw,38px); letter-spacing:-0.03em; margin:18px 0 10px; }
+  .featured > p { font-size:17px; color:var(--fg-dim); max-width:760px; margin-bottom:22px; }
+  .featured .gis-figure { margin-top:26px; }
+
+  .honest { border-left:3px solid var(--magenta); padding:6px 0 6px 22px; max-width:760px; color:var(--fg-dim); font-size:17px; }
+  .about { display:grid; grid-template-columns:1.2fr 1fr; gap:40px; align-items:start; }
+  .about p { color:var(--fg-dim); font-size:17px; margin-bottom:14px; }
+  .facts { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+  .facts div { padding:14px 20px; border-bottom:1px solid var(--line-soft); }
+  .facts div:last-child { border-bottom:0; }
+  .facts .k { font-family:var(--util); font-weight:600; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--fg-faint); display:block; margin-bottom:3px; }
+  .facts .v { font-family:var(--mono); font-size:13.5px; }
+
+  .contact { text-align:center; padding:110px 0 100px; }
+  .contact h2 { font-family:var(--display); font-weight:800; font-size:clamp(32px,5.5vw,56px); line-height:1.02; letter-spacing:-0.035em; margin:18px 0 20px; }
+  .contact h2 .accent { color:var(--magenta); }
+  .contact p { color:var(--fg-dim); max-width:540px; margin:0 auto 32px; }
+
+  footer.foot { border-top:1px solid var(--line); padding:26px 0; }
+  .foot-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-family:var(--util); font-size:11.5px; color:var(--fg-faint); letter-spacing:0.06em; }
+  .foot-inner a:hover { color:var(--magenta); }
+  .foot-mark { display:flex; align-items:center; gap:10px; }
+  .foot-mark img { height:24px; width:auto; display:block; background:var(--fg); padding:4px 5px; border-radius:8px; }
+
+  .lightbox { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(13,17,22,0.92); cursor:zoom-out; }
+  .lightbox.open { display:flex; }
+  .lightbox img { max-width:100%; max-height:100%; border:1px solid var(--line); border-radius:8px; }
+  .lightbox-close { position:absolute; top:18px; right:22px; background:none; border:0; color:var(--paper); font-size:30px; line-height:1; padding:6px 10px; cursor:pointer; opacity:.75; }
+
+  :focus-visible { outline:2px solid var(--magenta); outline-offset:3px; }
+  @media (max-width:880px) {
+    .brand .logo-full { display:none; } .brand .logo-mark { display:block; }
+    .caps, .fig-row, .about { grid-template-columns:1fr; }
+    .steps { grid-template-columns:1fr 1fr; }
+    .featured { padding:30px 22px; }
+    .nav-links { position:fixed; top:60px; right:0; flex-direction:column; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 22px; gap:18px; transform:translateX(120%); transition:transform .3s; }
+    .nav-links.open { transform:translateX(-16px); }
+    .nav-toggle { display:block; background:none; border:1px solid var(--line); border-radius:10px; color:var(--fg); font-family:var(--util); font-weight:600; font-size:12px; letter-spacing:0.08em; padding:8px 12px; cursor:pointer; }
+  }
+  @media (max-width:520px) { body { font-size:17.5px; } .steps { grid-template-columns:1fr; } .topo-bg { opacity:.2; } .hero { padding-top:120px; } }
+  @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+
+<div class="topo-bg" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand" aria-label="Emil Endres — home">
+      <img class="logo-full" src="logo.png" alt="Emil Endres — UAV · GIS · Data" />
+      <img class="logo-mark" src="logo-mark.png" alt="Emil Endres" />
+    </a>
+    <button class="nav-toggle" onclick="document.getElementById('navlinks').classList.toggle('open')">MENU</button>
+    <nav class="nav-links" id="navlinks">
+      <a href="#features">Features</a>
+      <a href="#readiness">Readiness add-on</a>
+      <a href="#how">How it works</a>
+      <a href="#contact">Contact</a>
+      <a href="index.html">Portfolio</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow">For UK health &amp; safety consultancies</span>
+    <h1>RAMS Builder</h1>
+    <p class="role">Site-specific construction RAMS on your client’s letterhead, in under 5 minutes.</p>
+    <p class="lede">Pick the client, tick the work activities and site conditions, adjust the controls,
+      and approve. The tool assembles the risk assessment, method statement, PPE, competence
+      and emergency arrangements from a UK construction hazard library, then keeps every
+      revision on record.</p>
+    <div class="cta-row">
+      <a href="rams-builder-demo.html" class="btn primary" target="_blank" rel="noopener">Try the live demo →</a>
+      <a href="mailto:emil@emilendres.com?subject=RAMS%20Builder%20demo" class="btn">Book a 15-minute demo</a>
+    </div>
+    <p class="note">The demo runs in your browser with sample clients. Nothing you type is saved or sent anywhere.</p>
+  </div>
+</section>
+
+<section id="features" class="divider">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What it does</span>
+      <h2>Your RAMS, without the copy-paste</h2>
+      <p>Built for consultancies who write RAMS for several contractor clients and need each one
+        to look right, score consistently and be easy to revise.</p>
+    </div>
+
+    <figure class="shot">
+      <div class="gis-figure"><img src="rams-risks.png" alt="RAMS Builder step 3: site conditions and editable risk assessment with likelihood × severity scoring" loading="lazy" /></div>
+      <figcaption>Step 3 of 4: site conditions add their hazards; every control measure and residual score can be edited for the site.</figcaption>
+    </figure>
+
+    <div class="caps">
+      <div class="cap">
+        <h3>A workspace for every client</h3>
+        <p>Each client has their own letterhead colour, contacts, nearest A&amp;E, assembly point and
+          PPE rules, so every RAMS goes out looking like it was written for them.</p>
+        <ul><li>Client letterhead on every document</li><li>Emergency details filled in automatically</li><li>Switch clients from one menu</li></ul>
+      </div>
+      <div class="cap">
+        <h3>UK construction hazard library</h3>
+        <p>Tick the activities: roof work, scaffold, MEWPs, towers, lifting, hot works, excavation,
+          electrical, dust, asbestos and more. The matching hazards, controls, PPE and
+          method statement steps are added for you.</p>
+        <ul><li>References WAH Regs 2005, LOLER, PUWER, COSHH, CAR 2012, EAWR 1989</li><li>Site conditions: public, occupied buildings, overhead lines, traffic…</li><li>Add site-specific hazards to any RAMS</li></ul>
+      </div>
+      <div class="cap">
+        <h3>Scoring and approval you can defend</h3>
+        <p>Likelihood × severity on a 1–5 scale, initial and residual. A RAMS can’t be marked
+          approved while any residual risk is still High, and approval records who signed it off and when.</p>
+        <ul><li>Draft → In review → Approved</li><li>Approver name and date on the document</li><li>Competence and plant inspections the job needs</li></ul>
+      </div>
+      <div class="cap">
+        <h3>Revision control and a register</h3>
+        <p>Every RAMS gets a reference and revision number. New revisions keep the old one current
+          until they’re approved, and the full history prints on the document.</p>
+        <ul><li>Searchable register for all clients</li><li>Print or save as PDF (A4)</li><li>Copy an old job as the start of a new one</li></ul>
+      </div>
+    </div>
+
+    <div class="fig-row" style="margin-top:34px;">
+      <figure>
+        <div class="gis-figure"><img src="rams-document.png" alt="Finished RAMS document on the client's letterhead with job details and risk assessment table" loading="lazy" /></div>
+        <figcaption>The finished RAMS on the client’s letterhead, ready to print or save as PDF.</figcaption>
+      </figure>
+      <figure>
+        <div class="gis-figure"><img src="rams-overview.png" alt="Overview of live RAMS, approvals waiting and jobs starting soon across clients" loading="lazy" /></div>
+        <figcaption>One overview across every client: live RAMS, approvals waiting, jobs starting soon.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="readiness" class="divider">
+  <div class="wrap">
+    <div class="featured">
+      <span class="ft-tag">Add-on for retained clients</span>
+      <h3>Kit &amp; crew readiness</h3>
+      <p>Give your retained contractor clients a go/no-go check for every job. They keep their
+        crew cards (CSCS, IPAF, PASMA, SMSTS, first aid…) and kit inspections (LOLER, PAT, MOT…)
+        up to date, and the tool checks the approved RAMS, the right competence for the whole job
+        and in-date kit before anyone starts. You see every client’s status in one place.</p>
+      <div class="cta-row">
+        <a href="rams-readiness-demo.html" class="btn primary" target="_blank" rel="noopener">Try the combined demo →</a>
+      </div>
+      <div class="gis-figure"><img src="rams-readiness-check.png" alt="Readiness check showing READY WITH CAVEATS verdict, competence and kit checks for a re-roofing job" loading="lazy" /></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="divider">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>Four steps per RAMS</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n">01</span><h4>Job details</h4><p>Client, site, dates, principal contractor and scope.</p></div>
+      <div class="step"><span class="n">02</span><h4>Work activities</h4><p>Tick what’s being done; competence and plant requirements follow.</p></div>
+      <div class="step"><span class="n">03</span><h4>Site &amp; risks</h4><p>Add site conditions, edit controls and residual scores.</p></div>
+      <div class="step"><span class="n">04</span><h4>Review &amp; approve</h4><p>PPE, emergency arrangements, method statement, sign-off.</p></div>
+    </div>
+    <p class="honest" style="margin-top:40px;">The hazard library gives you a consistent, well-referenced
+      starting point. It doesn’t replace your judgement: every RAMS is reviewed, tailored to the
+      site and approved by your competent person before it’s issued.</p>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap about">
+    <div>
+      <span class="eyebrow">Who built it</span>
+      <div class="section-head" style="margin-bottom:0;"><h2>Built by an operations professional</h2></div>
+      <p>I’m Emil Endres. As a head of operations I wrote and approved RAMS, SOPs and site risk
+        assessments for field teams, and I built my own tool to stop doing it by copy-paste. RAMS
+        Builder is that tool, rebuilt for construction and for consultancies managing many clients.</p>
+      <p>Each consultancy gets its own licensed copy, set up with your name and your clients.</p>
+    </div>
+    <div class="facts">
+      <div><span class="k">Who it’s for</span><span class="v">UK H&amp;S consultancies</span></div>
+      <div><span class="k">Runs in</span><span class="v">Any modern browser · desktop or tablet</span></div>
+      <div><span class="k">Output</span><span class="v">Print / PDF on client letterhead</span></div>
+      <div><span class="k">Trial</span><span class="v">First month free</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact divider">
+  <div class="wrap">
+    <span class="eyebrow" style="justify-content:center;">Contact</span>
+    <h2>See it with <span class="accent">your clients.</span></h2>
+    <p>Book a 15-minute call and I’ll walk you through a RAMS for one of your own jobs.</p>
+    <div class="cta-row" style="justify-content:center;">
+      <a href="mailto:emil@emilendres.com?subject=RAMS%20Builder%20demo" class="btn primary">emil@emilendres.com</a>
+      <a href="rams-builder-demo.html" class="btn" target="_blank" rel="noopener">Try the demo</a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <span class="foot-mark"><img src="logo-mark.png" alt="Emil Endres" /> © <span id="yr"></span> Emil Endres</span>
+    <span><a href="index.html">emilendres.com</a></span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">&times;</button>
+  <img id="lightboxImg" src="" alt="" />
+</div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  document.querySelectorAll('#navlinks a').forEach(function(a){ a.addEventListener('click', function(){ document.getElementById('navlinks').classList.remove('open'); }); });
+  (function(){
+    var box=document.getElementById('lightbox'), img=document.getElementById('lightboxImg'), btn=document.getElementById('lightboxClose'), last=null;
+    function open(s){ last=s; img.src=s.currentSrc||s.src; img.alt=s.alt||''; box.classList.add('open'); document.body.style.overflow='hidden'; btn.focus(); }
+    function close(){ box.classList.remove('open'); document.body.style.overflow=''; img.src=''; if(last) last.focus(); }
+    document.querySelectorAll('.gis-figure img').forEach(function(el){ el.tabIndex=0; el.addEventListener('click',function(){open(el);}); el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(el);} }); });
+    box.addEventListener('click',close);
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&box.classList.contains('open')) close(); });
+  })();
+</script>
+</body>
+</html>

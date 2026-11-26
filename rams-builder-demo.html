@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<!--
+  RAMS & Readiness
+  © Emil Endres 2026. All rights reserved. emilendres.com
+  Demo build with fictional sample data. Not licensed for reuse or redistribution.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RAMS Builder demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* PLAN
+   VOICE: plain site-office English, the way a CMIOSH consultant talks to a roofing contractor.
+   IDEA: one place to write the RAMS and show the job is ready to start: right crew, right cards, kit in date.
+   PICTURE: a stamped site document lying on a paper desk; the go/no-go stamp is the hero.
+   COLOUR: paper and ink. Blue is for actions; green, amber and red are only for status; client colour only on letterheads.
+   TYPE: Archivo for words, DM Mono for refs, dates and counts.
+   LAYOUT: dark module sidebar, a wide working sheet, a side drawer for detail and an in-page dialog for confirmations.
+*/
+:root{
+  --paper:#F1F2ED; --sheet:#FBFBF8; --field:#FFFFFF; --hover:#F3F5F9;
+  --ink:#1B2230; --ink2:#4A5263; --muted:#7A8190;
+  --rule:#D6D9CF; --rule2:#E6E8E0;
+  --side:#1B2230; --side-ink:#C4CAD5; --side-hi:#262F40; --side-line:#2E3748;
+  --nav-on-bg:#FFFFFF; --nav-on-fg:#1B2230;
+  --blue:#1F4E8C; --blue-dk:#163C6D; --blue-soft:#E3EAF4; --on-blue:#FFFFFF;
+  --magenta:#A3246E; --magenta-soft:#F5E4EE;
+  --green:#2D7A4E; --green-soft:#E1EFE6;
+  --amber:#A86A12; --amber-soft:#F6ECD9;
+  --red:#B3261E; --red-soft:#F6E1DF;
+  --sans:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --mono:'DM Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+:root[data-theme="dark"]{
+  --paper:#12161D; --sheet:#1A1F28; --field:#10141A; --hover:#222936;
+  --ink:#E7EAEF; --ink2:#B0B7C3; --muted:#868E9C;
+  --rule:#2F3746; --rule2:#252C39;
+  --blue:#7BA4DE; --blue-dk:#9BBBE8; --blue-soft:#1D2A3E; --on-blue:#0C0F14;
+  --magenta:#DA78B0; --magenta-soft:#3A1E30;
+  --green:#66BD8C; --green-soft:#162E20;
+  --amber:#DDA853; --amber-soft:#33270F;
+  --red:#EC7A70; --red-soft:#3A1B19;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12161D; --sheet:#1A1F28; --field:#10141A; --hover:#222936;
+    --ink:#E7EAEF; --ink2:#B0B7C3; --muted:#868E9C;
+    --rule:#2F3746; --rule2:#252C39;
+    --blue:#7BA4DE; --blue-dk:#9BBBE8; --blue-soft:#1D2A3E; --on-blue:#0C0F14;
+    --magenta:#DA78B0; --magenta-soft:#3A1E30;
+    --green:#66BD8C; --green-soft:#162E20;
+    --amber:#DDA853; --amber-soft:#33270F;
+    --red:#EC7A70; --red-soft:#3A1B19;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+button{font-family:inherit;font-size:13px;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;font-size:13px;color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:2px;padding:7px 9px}
+textarea{resize:vertical;line-height:1.45}
+input[type=checkbox]{width:16px;height:16px;padding:0;accent-color:var(--blue)}
+input[type=color]{padding:2px;height:34px;width:60px}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.mono{font-family:var(--mono);font-size:12.5px}
+.muted{color:var(--muted)}
+a{color:var(--blue)}
+
+/* Frame */
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+aside,nav{min-width:0}
+aside{background:var(--side);color:var(--side-ink);padding:22px 16px;display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;gap:10px;align-items:center;color:#fff;font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.15}
+.brand .logo{flex:0 0 34px;height:34px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.02em}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:#9AA3B2;margin-top:3px;letter-spacing:0}
+.ws{display:flex;flex-direction:column;gap:5px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8C95A4}
+.ws select{background:var(--side-hi);color:#fff;border-color:var(--side-line);font-size:13px;text-transform:none;letter-spacing:0}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{background:none;border:0;color:var(--side-ink);text-align:left;padding:8px 10px;border-radius:3px;font-size:14px;font-weight:500;display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap}
+nav button:hover{background:var(--side-hi);color:#fff}
+nav button.active{background:var(--nav-on-bg);color:var(--nav-on-fg)}
+nav .count{font-family:var(--mono);font-size:11px;background:var(--magenta);color:#fff;border-radius:9px;padding:1px 7px}
+nav .sep{height:1px;background:var(--side-line);margin:8px 0}
+nav button.theme{color:#9AA3B2;font-size:13px}
+nav button.theme svg{width:15px;height:15px;flex:0 0 15px}
+.side-foot{margin-top:auto;font-size:12px;color:#8C95A4;border-top:1px solid var(--side-line);padding-top:14px;line-height:1.55}
+.side-foot b{color:#DDE2EA;font-weight:600}
+.side-foot a{color:#DDE2EA;text-decoration:none;border-bottom:1px solid #4A5263}
+
+main{padding:26px 34px 70px;max-width:1340px;width:100%;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px;border-bottom:2px solid var(--ink);padding-bottom:14px;flex-wrap:wrap}
+.top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.top p{margin:4px 0 0;color:var(--ink2);max-width:72ch}
+.top .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.date{font-family:var(--mono);font-size:12px;color:var(--ink2);white-space:nowrap}
+h2{font-size:15px;font-weight:700;margin:0 0 12px;letter-spacing:-.005em;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+h2 small{font-weight:500;color:var(--muted);font-size:12px}
+.panel{background:var(--sheet);border:1px solid var(--rule);padding:18px 20px;min-width:0}
+.grid{display:grid;gap:18px}
+.g-2{grid-template-columns:1.35fr 1fr}
+.g-2e{grid-template-columns:1fr 1fr}
+.stack{display:flex;flex-direction:column;gap:18px}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 8px 2px 7px;border-radius:2px;white-space:nowrap;border-left:3px solid}
+.chip.s{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.chip.d{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.chip.r{background:var(--amber-soft);color:var(--amber);border-color:var(--amber)}
+.chip.u{background:var(--red-soft);color:var(--red);border-color:var(--red)}
+.chip.i{background:var(--magenta-soft);color:var(--magenta);border-color:var(--magenta)}
+.chip.n{background:var(--rule2);color:var(--ink2);border-color:var(--muted)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
+.rb{font-family:var(--mono);font-size:11.5px;padding:2px 6px;border-radius:2px;white-space:nowrap;display:inline-block}
+.rb.L{background:var(--green-soft);color:var(--green)}
+.rb.M{background:var(--amber-soft);color:var(--amber)}
+.rb.H{background:var(--red-soft);color:var(--red);font-weight:500}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:2px;margin:2px 4px 2px 0;background:var(--rule2);color:var(--ink2);white-space:nowrap}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.tag.bad{background:var(--red-soft);color:var(--red)}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule);background:var(--sheet);margin-bottom:18px}
+.tile{background:none;border:0;border-right:1px solid var(--rule2);padding:14px 16px;text-align:left;color:var(--ink)}
+.tile:last-child{border-right:0}
+.tile:hover{background:var(--hover)}
+.tile .n{display:block;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.tile .l{display:block;font-weight:600;font-size:13px;margin-top:3px}
+.tile small{display:block;color:var(--muted);font-size:12px}
+.tile.bad .n{color:var(--red)} .tile.warn .n{color:var(--amber)} .tile.good .n{color:var(--green)}
+
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:11px 0;border-bottom:1px solid var(--rule2);align-items:center}
+.row:last-child{border-bottom:0}
+.row.click{cursor:pointer}
+.row.click:hover .nm{color:var(--blue);text-decoration:underline}
+.nm{font-weight:600}
+.meta{font-size:12.5px;color:var(--ink2)}
+.alert{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--rule2);font-size:13px;align-items:start;cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;color:var(--ink)}
+.alert:hover .what{color:var(--blue)}
+.alert:last-child{border-bottom:0}
+.alert .what small{display:block;color:var(--muted);font-size:12px}
+.cl-row{display:grid;grid-template-columns:minmax(120px,1.2fr) 1fr 1fr;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule2);font-size:13px}
+.cl-row:last-child{border-bottom:0}
+.meter{display:grid;grid-template-columns:1fr 42px;gap:8px;align-items:center}
+.minibar{height:8px;background:var(--rule2);position:relative}
+.minibar i{position:absolute;left:0;top:0;bottom:0;background:var(--green)}
+.minibar i.mid{background:var(--amber)} .minibar i.low{background:var(--red)}
+.meter span{font-family:var(--mono);font-size:11.5px;color:var(--ink2);text-align:right}
+
+/* Tables */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.toolbar input[type=search]{width:240px;max-width:100%}
+.toolbar .grow{flex:1}
+.tablewrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink2);font-size:12px;padding:9px 12px;border-bottom:1.5px solid var(--ink);background:var(--sheet);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--rule2);vertical-align:middle;white-space:nowrap}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--hover)}
+td.warn{color:var(--amber);font-weight:600}
+td.bad{color:var(--red);font-weight:600}
+td.wrap{white-space:normal;min-width:200px}
+.empty{padding:30px;text-align:center;color:var(--ink2)}
+
+/* Buttons */
+.btn{border:1px solid var(--ink);background:var(--field);color:var(--ink);padding:7px 12px;border-radius:2px;font-weight:600;white-space:nowrap}
+.btn:hover{background:var(--ink);color:var(--sheet)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.btn.primary:hover{background:var(--blue-dk);border-color:var(--blue-dk)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:var(--red);color:#fff}
+.btn.ghost{border-color:transparent;background:none;color:var(--blue);padding-left:4px;padding-right:4px}
+.btn.ghost:hover{background:none;text-decoration:underline;color:var(--blue)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:disabled:hover{background:var(--field);color:var(--ink)}
+.btn.sm{padding:4px 9px;font-size:12px}
+
+/* Drawer + dialog */
+.scrim{position:fixed;inset:0;background:rgba(12,15,20,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:19}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:var(--sheet);border-left:2px solid var(--ink);box-shadow:-12px 0 30px rgba(12,15,20,.15);transform:translateX(105%);transition:transform .22s ease;z-index:20;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer header{padding:20px 52px 14px 22px;border-bottom:1px solid var(--rule)}
+.drawer header .id{font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.drawer header h3{margin:4px 0 8px;font-size:19px;letter-spacing:-.01em}
+.drawer .body{padding:16px 22px 30px;overflow:auto;flex:1}
+.drawer .close{position:absolute;top:14px;right:14px;background:none;border:1px solid var(--rule);width:30px;height:30px;font-size:16px;border-radius:2px}
+dl.kv{display:grid;grid-template-columns:130px 1fr;gap:7px 12px;margin:0 0 18px;font-size:13px}
+dl.kv dt{color:var(--ink2)}
+dl.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.hist{border-left:2px solid var(--rule);padding-left:14px;margin:0;list-style:none}
+.hist li{position:relative;padding:0 0 12px;font-size:13px}
+.hist li::before{content:"";position:absolute;left:-19px;top:5px;width:8px;height:8px;background:var(--sheet);border:2px solid var(--blue);border-radius:50%}
+.hist time{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.sub-h{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:40;padding:16px;background:rgba(12,15,20,.45)}
+.modal.open{display:flex}
+.mbox{background:var(--sheet);border:2px solid var(--ink);width:480px;max-width:100%;max-height:90vh;overflow:auto;padding:20px 22px}
+.mbox h3{margin:0 0 8px;font-size:18px;letter-spacing:-.01em}
+.mbox p{margin:0 0 12px;color:var(--ink2)}
+.mact{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
+.mbox textarea.copy{width:100%;height:220px;font-family:var(--mono);font-size:11.5px}
+
+/* Forms */
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.fields .full{grid-column:1/-1}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f > span{font-size:12px;font-weight:600;color:var(--ink2)}
+.f > span em{color:var(--red);font-style:normal}
+.f input,.f select,.f textarea{width:100%}
+.hint{font-size:12px;color:var(--muted)}
+
+/* Wizard */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);background:var(--sheet);margin-bottom:18px}
+.steps button{background:none;border:0;border-right:1px solid var(--rule2);padding:11px 14px;text-align:left;display:flex;gap:10px;align-items:center;color:var(--ink2)}
+.steps button:last-child{border-right:0}
+.steps .n{width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11.5px;flex:0 0 24px}
+.steps b{font-weight:600;font-size:13px}
+.steps button.on{color:var(--ink);box-shadow:inset 0 -3px var(--blue)}
+.steps button.on .n{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.steps button.done .n{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.w-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.w-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.opt{display:grid;grid-template-columns:18px 1fr;gap:9px;align-items:start;border:1px solid var(--rule);background:var(--field);padding:9px 11px;cursor:pointer;border-radius:2px}
+.opt:hover{border-color:var(--ink2)}
+.opt.on{border-color:var(--blue);box-shadow:inset 3px 0 var(--blue)}
+.opt b{display:block;font-size:13px;font-weight:600}
+.opt small{display:block;font-size:12px;color:var(--muted)}
+.pick{border:1px solid var(--rule);background:var(--field);max-height:340px;overflow:auto}
+.pick label{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;padding:8px 11px;border-bottom:1px solid var(--rule2);cursor:pointer;font-size:13px}
+.pick label:last-child{border-bottom:0}
+.pick label:hover{background:var(--hover)}
+.pick .sub{font-size:12px;color:var(--muted)}
+.req{display:grid;grid-template-columns:20px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--rule2);font-size:12.5px}
+.req:last-child{border-bottom:0}
+.req .mk{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+.mk.pass{background:var(--green)} .mk.warn{background:var(--amber)} .mk.fail{background:var(--red)} .mk.info{background:var(--blue)}
+.req small{display:block;color:var(--muted)}
+.rtable{border:1px solid var(--rule);background:var(--sheet)}
+.rrow{display:grid;grid-template-columns:minmax(150px,1fr) 122px minmax(220px,2fr) 150px 26px;gap:12px;padding:10px 12px;border-bottom:1px solid var(--rule2);align-items:start}
+.rrow:last-child{border-bottom:0}
+.rrow.head{font-size:12px;font-weight:600;color:var(--ink2);border-bottom:1.5px solid var(--ink);padding-top:9px;padding-bottom:9px}
+.rrow b{display:block;font-size:13px}
+.rrow small{display:block;font-size:12px;color:var(--muted)}
+.rrow textarea{width:100%;font-size:12.5px;min-height:62px}
+.rres{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.rres select{padding:4px 5px;font-family:var(--mono);font-size:12px}
+.x{background:none;border:0;color:var(--muted);font-size:16px;padding:2px;line-height:1}
+.x:hover{color:var(--red)}
+.addhz{display:grid;grid-template-columns:1.2fr 1fr 2fr auto;gap:8px;margin-top:10px}
+.ppe{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ppe span{font-size:12.5px;border:1px solid var(--rule);background:var(--field);padding:3px 8px;border-radius:2px}
+.warnbox{border:1px solid var(--amber);background:var(--amber-soft);color:var(--ink);padding:10px 12px;font-size:12.5px;margin-top:10px}
+.warnbox.bad{border-color:var(--red);background:var(--red-soft)}
+.warnbox ul{margin:4px 0 0;padding-left:18px}
+
+/* Readiness */
+.dep-head{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;margin-bottom:18px}
+.dep-head > div{min-width:0}
+.dep-head select{width:100%;font-size:15px;font-weight:600;padding:8px 10px;border:1.5px solid var(--ink);max-width:100%}
+.facts{display:flex;gap:24px;margin-top:12px;flex-wrap:wrap;font-size:13px}
+.facts div span{display:block;color:var(--ink2);font-size:12px}
+.facts div b{font-weight:600}
+.verdict{border:3px solid;padding:12px 18px;text-align:center;min-width:240px;transform:rotate(-1.2deg);background:var(--sheet)}
+.verdict .big{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.1}
+.verdict small{display:block;font-size:12px;margin-top:4px;font-weight:500}
+.verdict.ok{border-color:var(--green);color:var(--green)}
+.verdict.caveat{border-color:var(--amber);color:var(--amber)}
+.verdict.no{border-color:var(--red);color:var(--red)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));border:1px solid var(--rule);background:var(--sheet);margin-bottom:18px}
+.check{padding:12px 14px;border-right:1px solid var(--rule2);border-bottom:1px solid var(--rule2);display:grid;grid-template-columns:22px 1fr;gap:8px}
+.check .mk{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;margin-top:1px}
+.check b{display:block;font-size:13px}
+.check p{margin:2px 0 0;font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}
+.check .grp{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sign{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule2);font-size:13px}
+.sign:last-child{border-bottom:0}
+
+/* Clients */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.ccard{background:var(--sheet);border:1px solid var(--rule);border-top:5px solid var(--cc);padding:16px 18px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:10px}
+.ccard:hover{border-color:var(--ink2);border-top-color:var(--cc)}
+.ccard .hd{display:flex;gap:12px;align-items:center}
+.ccard .mark{width:42px;height:42px;background:var(--cc);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 42px}
+.ccard .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-top:1px solid var(--rule2);padding-top:10px}
+.ccard .stats b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.ccard .stats span{font-size:11.5px;color:var(--muted)}
+
+/* Document (always on white paper) */
+.doc-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.doc{--green:#2D7A4E;--green-soft:#E1EFE6;--amber:#A86A12;--amber-soft:#F6ECD9;--red:#B3261E;--red-soft:#F6E1DF;--rule2:#E6E8E0;--ink2:#4A5263;--muted:#7A8190;
+  background:#fff;color:#1B2230;max-width:880px;margin:0 auto;padding:40px 46px 46px;border:1px solid var(--rule);position:relative;font-size:12.5px;overflow:hidden}
+.doc .lh{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;border-bottom:3px solid var(--cc);padding-bottom:14px}
+.doc .mark{width:52px;height:52px;background:var(--cc);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:19px}
+.doc .co{font-weight:800;font-size:17px;letter-spacing:-.01em}
+.doc .co small{display:block;font-weight:500;font-size:11.5px;color:#4A5263;letter-spacing:0}
+.doc .ttl{text-align:right}
+.doc .ttl b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.doc .ttl .mono{font-size:12px;color:#4A5263}
+.doc .stamp{display:inline-block;border:2px solid;padding:2px 8px;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+.doc .stamp.Approved{color:#2D7A4E} .doc .stamp.Draft,.doc .stamp.In{color:#A86A12} .doc .stamp.Superseded,.doc .stamp.Closed{color:#7A8190}
+.doc h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;margin:24px 0 8px;color:var(--cc);border-bottom:1px solid #D6D9CF;padding-bottom:4px}
+.doc table{font-size:11.5px;width:100%}
+.doc th{position:static;background:#F3F4EF;color:#4A5263;border-bottom:1px solid #1B2230;padding:6px 8px;white-space:normal}
+.doc td{white-space:normal;vertical-align:top;padding:6px 8px;border-bottom:1px solid #E6E8E0}
+.doc .facts2{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid #D6D9CF}
+.doc .facts2 div{padding:7px 10px;border-bottom:1px solid #E6E8E0;border-right:1px solid #E6E8E0}
+.doc .facts2 span{display:block;font-size:10.5px;color:#7A8190;text-transform:uppercase;letter-spacing:.06em}
+.doc ol.ms{margin:0;padding-left:0;list-style:none}
+.doc ol.ms li.h{font-weight:700;margin:10px 0 4px}
+.doc ol.ms li.b{padding-left:16px;position:relative;margin:2px 0}
+.doc ol.ms li.b::before{content:"–";position:absolute;left:2px;color:#7A8190}
+.doc .foot{margin-top:28px;border-top:1px solid #D6D9CF;padding-top:10px;font-size:10.5px;color:#7A8190;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.doc .wm{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%) rotate(-24deg);font-size:120px;font-weight:800;color:rgba(179,38,30,.06);pointer-events:none;letter-spacing:.08em;white-space:nowrap}
+.doc .matrix{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:#4A5263}
+
+.demo-bar{background:var(--magenta-soft);border:1px solid var(--magenta);color:var(--ink);padding:9px 14px;font-size:13px;margin:-6px 0 18px}
+.demo-bar b{color:var(--magenta)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--sheet);padding:10px 16px;font-size:13px;border-radius:2px;opacity:0;transition:all .2s;z-index:50;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:1100px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .tile:nth-child(3){border-right:0}
+  .tile:nth-child(-n+3){border-bottom:1px solid var(--rule2)}
+  .w-grid{grid-template-columns:1fr}
+}
+@media (max-width:1000px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+  aside{padding:12px 14px;gap:10px}
+  .brand small{display:none}
+  nav{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:2px}
+  nav .sep{display:none}
+  nav button{font-size:13px;padding:7px 10px;flex:0 0 auto}
+  .side-foot{display:none}
+  main{padding:20px 16px 60px}
+  .g-2,.g-2e,.dep-head{grid-template-columns:minmax(0,1fr)}
+  .verdict{justify-self:start}
+}
+@media (max-width:640px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .tile{border-bottom:1px solid var(--rule2)!important;border-right:1px solid var(--rule2)!important}
+  .tile:nth-child(2n){border-right:0!important}
+  .fields{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(4,auto);overflow-x:auto}
+  .steps b{display:none}
+  .rrow{grid-template-columns:1fr 1fr}
+  .rrow > textarea{grid-column:1/-1}
+  .rrow.head{display:none}
+  .addhz{grid-template-columns:1fr}
+  .cl-row{grid-template-columns:1fr}
+  dl.kv{grid-template-columns:1fr;gap:2px}
+  dl.kv dd{margin-bottom:8px}
+  .top h1{font-size:22px}
+  .doc{padding:22px 18px}
+  .doc .lh{grid-template-columns:auto 1fr}
+  .doc .ttl{grid-column:1/-1;text-align:left}
+  .doc .facts2{grid-template-columns:1fr}
+  .tile .n{font-size:26px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  @page{size:A4;margin:14mm}
+  aside,.top,.doc-bar,.drawer,.scrim,.modal,.toast,.no-print{display:none!important}
+  .app{display:block}
+  html,body{background:#fff}
+  main{padding:0;max-width:none}
+  .doc{border:0;padding:0;max-width:none}
+  .doc tr{break-inside:avoid}
+  .doc h4{break-after:avoid}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><span class="logo" id="logo"></span><div><span id="pname"></span><small id="licensee"></small></div></div>
+    <label class="ws">Client workspace<select id="ws" data-on="ws"></select></label>
+    <nav id="nav" aria-label="Modules"></nav>
+    <div class="side-foot" id="sidefoot"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div class="scrim" id="scrim" data-act="closeDrawer"></div>
+<div class="drawer" id="drawer" aria-hidden="true"></div>
+<div class="modal" id="modal"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+/* ================= Config ================= */
+const MODE = 'rams'; /* 'full' = RAMS + readiness, 'rams' = RAMS builder only, 'ready' = kit & crew readiness only */
+const DEMO = true; /* true = public website demo: sample data, nothing saved */
+const FULL = MODE==='full', RAMSONLY = MODE==='rams', READYONLY = MODE==='ready';
+const PRODUCT = {
+  full:{name:'RAMS & Readiness', logo:'R&R', plan:'Consultancy: up to 10 client workspaces'},
+  rams:{name:'RAMS Builder', logo:'RAMS', plan:'Consultancy: unlimited RAMS, up to 10 client workspaces'},
+  ready:{name:'Kit & Crew Readiness', logo:'K&C', plan:'Contractor: one company, unlimited jobs'}
+}[MODE];
+const CFG = {
+  vendor:'Emil Endres', vendorSite:'https://emilendres.com',
+  licensee:'Fenline Safety Consulting Ltd', preparer:'Jo Hart CMIOSH',
+  licence:'DEMO-7Q4K-2026', plan:PRODUCT.plan
+};
+const STORE = 'rams-readiness.v1.'+MODE;
+const stLabel = s => READYONLY ? ({'Draft':'Awaiting RAMS','In review':'Awaiting RAMS','Approved':'RAMS approved'}[s]||s) : s;
+const EMBED = (()=>{ try { return window.self !== window.top; } catch(e){ return true; } })();
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const isoOf = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const TODAY = isoOf(new Date());
+const dt = s => new Date(s+'T12:00:00');
+const addDays = (s,n) => { const x = dt(s); x.setDate(x.getDate()+n); return isoOf(x); };
+const diff = (a,b) => Math.round((dt(b)-dt(a))/864e5);
+const fmt = s => s ? dt(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const fmtS = s => s ? dt(s).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}) : '—';
+const fmtT = t => new Date(t).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+let _n = 0; const uid = p => p + Date.now().toString(36).slice(-5) + (++_n).toString(36);
+const uniq = a => [...new Set(a)];
+const opt = (v,l,sel) => `<option value="${esc(v)}"${sel?' selected':''}>${esc(l)}</option>`;
+
+/* ================= Reference library ================= */
+const CERTS = {
+  CSCS:{l:'CSCS / CISRS card', s:'CSCS'}, ECS:{l:'ECS / JIB card', s:'ECS'},
+  SMSTS:{l:'SMSTS', s:'SMSTS'}, SSSTS:{l:'SSSTS', s:'SSSTS'},
+  FAW:{l:'First Aid at Work', s:'FAW'}, EFAW:{l:'Emergency First Aid at Work', s:'EFAW'},
+  IPAF:{l:'IPAF PAL card', s:'IPAF'}, PASMA:{l:'PASMA towers', s:'PASMA'},
+  ASB:{l:'Asbestos awareness', s:'Asbestos'}, FIT:{l:'RPE face-fit test', s:'Face-fit'},
+  CAT:{l:'CAT & Genny', s:'CAT'}, SLING:{l:'Slinger / signaller', s:'Slinger'}
+};
+const CREW_COLS = [
+  {l:'Site card', c:['CSCS','ECS']}, {l:'Supervisor', c:['SMSTS','SSSTS']}, {l:'First aid', c:['FAW','EFAW']},
+  {l:'IPAF', c:['IPAF']}, {l:'PASMA', c:['PASMA']}, {l:'Asbestos', c:['ASB']}, {l:'Face-fit', c:['FIT']},
+  {l:'CAT', c:['CAT']}, {l:'Slinger', c:['SLING']}
+];
+const ASSET_TYPES = {
+  ladder:{l:'Ladder / stepladder', insp:'Detailed inspection', every:90},
+  tower:{l:'Mobile access tower', insp:'Detailed inspection', every:90},
+  mewp:{l:'MEWP', insp:'LOLER thorough examination', every:182},
+  harness:{l:'Harness & lanyard', insp:'LOLER thorough examination', every:182},
+  lifting:{l:'Lifting equipment', insp:'LOLER thorough examination', every:182},
+  powertool:{l:'Power tool (110V / battery)', insp:'PAT test', every:90},
+  extractor:{l:'Dust extractor (M-class)', insp:'PAT & filter check', every:90},
+  extinguisher:{l:'Fire extinguisher', insp:'Annual service', every:365},
+  cat:{l:'CAT & Genny', insp:'Calibration', every:365},
+  tester:{l:'Voltage indicator & lock-off kit', insp:'Calibration', every:365},
+  firstaid:{l:'First aid kit', insp:'Contents check', every:90},
+  vehicle:{l:'Van / vehicle', insp:'MOT', every:365}
+};
+const ASTATUS = { S:{l:'Available',c:'s'}, D:{l:'On job',c:'d'}, U:{l:'Quarantined',c:'u'}, R:{l:'At repair',c:'r'} };
+const RSTATUS = { 'Draft':'r', 'In review':'i', 'Approved':'s', 'Superseded':'n', 'Closed':'n' };
+
+/* Hazard rows: [hazard, who, initial L, initial S, controls, residual L, residual S] */
+const BASE = {
+  hz:[
+    ['Slips, trips and falls on the level','Everyone on site',3,3,'Good housekeeping; access routes kept clear; waste removed daily; cables routed overhead or covered; adequate lighting.',2,3],
+    ['Injury with no first aid response','Everyone on site',2,4,'Trained first aider on site during all working hours; first aid kit stocked and in date; nearest A&E named in this RAMS.',1,4]
+  ],
+  ppe:['Safety helmet','Safety boots (S3)','Hi-vis vest or jacket','Gloves suited to the task','Safety glasses'],
+  comp:[
+    {c:['CSCS','ECS'], who:'all', why:'Site card (CSCS or partner scheme)'},
+    {c:['SMSTS','SSSTS'], who:'one', why:'Site supervisor (SMSTS / SSSTS)'},
+    {c:['FAW','EFAW'], who:'one', why:'First aider on site'}
+  ],
+  kit:['firstaid']
+};
+const TASKS = {
+  wah_ladder:{l:'Ladders & stepladders', hz:[
+    ['Fall from ladder or stepladder','Operatives',3,4,'Ladders used only for short-duration, light work where a safer platform is not justified (Work at Height Regs 2005). EN 131 Professional ladders, pre-use check and tag. Footed or tied, 1-in-4 angle, three points of contact, no overreaching.',2,4]],
+    kit:['ladder'], steps:['Pre-use check ladders and stepladders and confirm tags are in date; set up on firm, level ground, footed or tied.']},
+  wah_tower:{l:'Mobile access tower', hz:[
+    ['Fall from tower platform or during erection','Operatives',3,5,'Erected by PASMA-trained operatives using the 3T or AGR method to the manufacturer’s guide. Outriggers fitted, castors locked, guardrails and toe boards complete. Inspected after erection, after alteration and at least every 7 days; tag displayed.',1,5],
+    ['Tower overturn when moving or in wind','Operatives, others nearby',2,5,'Never moved with people or materials on the platform. Route checked for slopes, holes and overhead obstructions. Work stopped above the manufacturer’s wind limit.',1,5]],
+    kit:['tower'], comp:[{c:['PASMA'], who:'one', why:'Tower erection and inspection (PASMA)'}],
+    steps:['Erect the tower to the manufacturer’s guide using 3T/AGR; complete and display the inspection tag before use.']},
+  wah_scaff:{l:'Work from scaffold', hz:[
+    ['Fall from scaffold','Operatives',3,5,'Scaffold erected by CISRS-carded scaffolders to TG20 or a specific design. Handover certificate received; inspected before first use, after alteration or bad weather and every 7 days; Scafftag green. No unauthorised alterations.',1,5],
+    ['Falling materials onto people below','Operatives, public',3,4,'Toe boards and brick guards fitted; debris netting where needed. Materials stacked away from edges. Exclusion zone below loading areas.',1,4]],
+    steps:['Check the scaffold handover certificate and current Scafftag before access; report defects to the scaffold contractor.']},
+  roof:{l:'Roof work', hz:[
+    ['Fall from roof edge','Operatives',4,5,'Collective edge protection (scaffold or edge protection system) in place before roof access. Where not practicable, fall restraint with tested anchors. Rescue plan in place.',1,5],
+    ['Fall through fragile roof or rooflights','Operatives',3,5,'All fragile surfaces identified and marked before work. Rooflights covered or guarded. Staging or crawling boards used; nobody walks on fragile sheets.',1,5],
+    ['Adverse weather on the roof','Operatives',3,4,'Forecast checked daily; work stopped in high wind, ice, heavy rain or poor visibility. Supervisor has stop-work authority.',2,4]],
+    kit:['harness'], ppe:['Harness and restraint lanyard where specified'],
+    steps:['Confirm edge protection and fragile-surface protection are in place before anyone goes onto the roof.','Check the weather before roof access and at intervals through the day.']},
+  mewp:{l:'MEWP (boom or scissor lift)', hz:[
+    ['MEWP overturn','Operator, others nearby',3,5,'Ground conditions assessed and spreader plates used; outriggers deployed on level ground; wind speed checked against the plate limit; exclusion zone around the base.',1,5],
+    ['Operator trapped or crushed against a structure','Operator',3,5,'Route planned to avoid overhead obstructions; secondary guarding on boom MEWPs; trained ground rescue person present with a rescue plan.',1,5],
+    ['Ejection or fall from platform','Operator',2,5,'Full body harness with short restraint lanyard clipped to the designated anchor in boom MEWPs. Gate kept closed.',1,5]],
+    kit:['mewp','harness'], comp:[{c:['IPAF'], who:'one', why:'MEWP operator (IPAF)'}], ppe:['Full body harness and restraint lanyard (boom MEWP)'],
+    steps:['Complete the MEWP pre-use inspection and confirm the LOLER thorough examination is in date.','Brief the ground rescue person on the rescue plan and ground controls before elevating.']},
+  lifting:{l:'Lifting operations', hz:[
+    ['Load falls or swings during a lift','Operatives, others nearby',3,5,'Lift planned by an appointed person under LOLER 1998. Accessories marked with SWL and thoroughly examined within 6 months. A competent slinger/signaller directs every lift. Exclusion zone below; nobody under suspended loads.',1,5]],
+    kit:['lifting'], comp:[{c:['SLING'], who:'one', why:'Slinger / signaller'}],
+    steps:['Review the lift plan with the slinger/signaller; check accessories are tagged and in date; set the exclusion zone below the lift.']},
+  hotworks:{l:'Hot works', hz:[
+    ['Fire from hot works','Operatives, occupants',3,5,'Hot works permit issued and closed out. Combustibles removed or protected within 10 m. Suitable extinguisher at the point of work. Fire watch during works and for at least 60 minutes after.',1,5],
+    ['Burns and fume','Operatives',3,3,'Correct gloves and eye protection; adequate ventilation or LEV for fume.',1,3]],
+    kit:['extinguisher'], ppe:['Fire-resistant gloves','Eye protection for cutting / welding'],
+    steps:['Obtain the hot works permit; clear combustibles; place an extinguisher at the point of work.','Keep a fire watch for at least 60 minutes after hot works finish, then close the permit.']},
+  tools:{l:'Hand-held power tools', hz:[
+    ['Contact with moving parts or kickback','Operatives',3,4,'Tools suitable for the task, guards fitted, inspected before use (PUWER 1998). 110V or battery tools only; PAT in date. Only trained operatives use tools.',1,4],
+    ['Hand-arm vibration','Operatives',3,3,'Low-vibration tools selected; trigger times recorded against HAV exposure points; job rotation to stay below the action value.',2,3],
+    ['Noise','Operatives, others nearby',3,3,'Noise assessed; hearing protection worn above 85 dB(A); noisy work scheduled to suit occupants.',2,3]],
+    kit:['powertool'], ppe:['Hearing protection'],
+    steps:['Pre-use check power tools and leads; confirm PAT labels are in date; 110V or battery only.']},
+  dust:{l:'Cutting, drilling or chasing (dust & silica)', hz:[
+    ['Respirable crystalline silica and construction dust','Operatives, others nearby',4,4,'On-tool extraction (M-class) or water suppression for all cutting. FFP3 RPE worn, face-fit tested. Area screened; dust cleared by vacuum, not dry sweeping.',2,4]],
+    kit:['extractor'], comp:[{c:['FIT'], who:'all', why:'RPE face-fit test for dusty work'}], ppe:['FFP3 RPE (face-fit tested)'],
+    steps:['Fit on-tool extraction or water suppression before cutting; check RPE fit before starting.']},
+  excavation:{l:'Excavation & groundworks', hz:[
+    ['Strike of buried services','Operatives',3,5,'Service drawings obtained; area scanned with CAT & Genny by a trained operative and marked out (HSG47). Hand-dig within 500 mm of indicated services. Permit to dig issued.',1,5],
+    ['Excavation collapse or fall into excavation','Operatives, public',3,5,'Excavations over 1.2 m supported or battered back; edges barriered; spoil kept 1 m back; daily inspection recorded.',1,5]],
+    kit:['cat'], comp:[{c:['CAT'], who:'one', why:'CAT & Genny operator'}],
+    steps:['Scan and mark services with CAT & Genny; issue the permit to dig before breaking ground.']},
+  electrical:{l:'Electrical work', hz:[
+    ['Electric shock or burns','Operatives',3,5,'Work dead wherever possible (Electricity at Work Regs 1989). Safe isolation, lock-off with personal padlock and tag, proved dead with a GS38 voltage indicator and proving unit. Only competent electricians work on systems.',1,5],
+    ['Arc flash at a live board','Operatives',2,5,'No live work without written justification and a permit. Arc-rated PPE where required.',1,5]],
+    kit:['tester'], comp:[{c:['ECS'], who:'one', why:'Competent electrician (ECS / JIB)'}], ppe:['Insulated gloves where specified'],
+    steps:['Carry out safe isolation; lock off and tag; prove dead with a voltage indicator and proving unit before work starts.']},
+  manual:{l:'Manual handling', hz:[
+    ['Musculoskeletal injury from lifting and carrying','Operatives',3,3,'Avoided where possible with mechanical aids (trolleys, hoists). Loads assessed (Manual Handling Ops Regs 1992); team lifts for heavy or awkward items; operatives trained in safe lifting.',2,3]]},
+  coshh:{l:'Hazardous substances (COSHH)', hz:[
+    ['Exposure to adhesives, solvents, sealants or cement','Operatives',3,3,'COSHH assessments and safety data sheets on site for each product. Least hazardous product chosen; ventilation; gloves and eye protection; washing facilities available.',1,3]],
+    ppe:['Chemical-resistant gloves'], steps:['Brief the COSHH assessments for products in use; store and dispose of substances as the data sheets say.']},
+  asbestos:{l:'Intrusive work in a pre-2000 building', hz:[
+    ['Disturbing asbestos-containing materials','Operatives, occupants',3,5,'Refurbishment & demolition survey reviewed for the work area before any intrusive work (Control of Asbestos Regs 2012). Known ACMs marked and avoided. Stop-work procedure if suspect material is found. Asbestos awareness for all.',1,5]],
+    comp:[{c:['ASB'], who:'all', why:'Asbestos awareness (pre-2000 building)'}],
+    steps:['Check the asbestos survey for the work area before drilling, cutting or removal; stop work and report any suspect material.']}
+};
+const CONDS = {
+  public:{l:'Public near the work', hz:[['Members of the public struck or entering the work area','Public',3,5,'Work area segregated with Heras fencing or barriers and signage; access controlled; banksman for deliveries; area secured at the end of each day.',1,5]],
+    steps:['Set up barriers and signage before starting; secure the area at the end of each shift.']},
+  occupied:{l:'Occupied building', hz:[['Noise, dust and disruption affecting occupants','Occupants',3,3,'Works programmed with the building manager; noisy and dusty tasks scheduled; fire escape routes kept clear; daily liaison.',2,3]],
+    steps:['Agree working hours and noisy-work windows with the building manager; keep fire escape routes clear.']},
+  overhead:{l:'Overhead power lines', hz:[['Contact with overhead power lines','Operatives',2,5,'DNO consulted; GS6 controls: goal posts, barriers and minimum clearance; no long items or plant under the lines without a permit.',1,5]],
+    steps:['Confirm GS6 goal posts and barriers are in place before plant or long materials move near the lines.']},
+  traffic:{l:'Vehicle & plant movements', hz:[['Struck by vehicles or plant','Operatives, public',3,5,'Traffic management plan; pedestrian and vehicle routes segregated; reversing only with a trained banksman; hi-vis for everyone.',1,5]],
+    steps:['Brief the traffic management plan; deliveries and reversing only under banksman control.']},
+  weather:{l:'Exposed to weather', hz:[['Cold, heat or wind affecting safe working','Operatives',3,3,'Forecast checked daily; wind limits for plant and access equipment observed; warm or shaded rest area and drinking water provided.',2,3]]},
+  lone:{l:'Lone working', hz:[['Lone worker unable to summon help','Lone worker',2,5,'Lone working avoided for high-risk tasks. Check-in calls at agreed intervals; lone worker device; supervisor escalates missed check-ins.',1,5]],
+    steps:['Agree check-in times with the supervisor before starting any lone work.']},
+  water:{l:'Near water', hz:[['Drowning','Operatives',2,5,'Edge barriers; lifejackets within 2 m of the edge; throw line and rescue equipment at the work area; no lone working near water.',1,5]], ppe:['Lifejacket within 2 m of water']},
+  night:{l:'Low light / night work', hz:[['Trips and collisions in low light','Operatives',3,3,'Task and access lighting installed before dusk; routes kept lit; Class 3 hi-vis.',1,3]]}
+};
+
+/* ================= Risk scoring ================= */
+const band = (l,s) => { const n=l*s; return n>=12?'H':n>=5?'M':'L'; };
+const BANDN = {L:'Low', M:'Medium', H:'High'};
+const rb = (l,s) => { const b=band(l,s); return `<span class="rb ${b}">${l}×${s}=${l*s} ${BANDN[b]}</span>`; };
+const highestResidual = r => { const bs=(r.risks||[]).map(x=>band(x.rL,x.rS)); return bs.includes('H')?'H':bs.includes('M')?'M':bs.length?'L':''; };
+
+function genRisks(d){
+  const out=[]; const push=(rows,src)=>(rows||[]).forEach(x=>out.push({h:x[0],who:x[1],iL:x[2],iS:x[3],c:x[4],rL:x[5],rS:x[6],src}));
+  push(BASE.hz,'base');
+  d.tasks.forEach(k=>TASKS[k]&&push(TASKS[k].hz,k));
+  d.conds.forEach(k=>CONDS[k]&&push(CONDS[k].hz,k));
+  return out;
+}
+function syncRisks(d){
+  const old=d.risks||[];
+  const merged=genRisks(d).map(r=>{ const o=old.find(x=>x.src!=='custom'&&x.h===r.h); return o?{...r,c:o.c,rL:o.rL,rS:o.rS}:r; });
+  d.risks=merged.concat(old.filter(x=>x.src==='custom'));
+}
+const reqsFor = d => { const out=[...BASE.comp]; d.tasks.forEach(k=>(TASKS[k]?.comp||[]).forEach(q=>{ if(!out.some(o=>o.why===q.why)) out.push(q); })); return out; };
+const kitFor = d => uniq([...BASE.kit, ...d.tasks.flatMap(k=>TASKS[k]?.kit||[]), ...d.conds.flatMap(k=>CONDS[k]?.kit||[])]);
+const ppeFor = d => { const c=client(d.client); return uniq([...BASE.ppe, ...d.tasks.flatMap(k=>TASKS[k]?.ppe||[]), ...d.conds.flatMap(k=>CONDS[k]?.ppe||[]), ...(c?.ppe||[]), ...String(d.ppeExtra||'').split(/[\n,]/).map(s=>s.trim()).filter(Boolean)]); };
+const jobEnd = r => addDays(r.start, Math.max(1, +r.days||1)-1);
+
+function genMethod(d){
+  const c=client(d.client); const L=[];
+  L.push('1. Before work starts');
+  L.push('- Site induction for everyone; brief this RAMS and record signatures on the briefing record.');
+  L.push('- Confirm permits needed for the work are issued, and that everyone knows the first aider, the assembly point and the nearest A&E.');
+  L.push('- Pre-use check all plant and equipment; quarantine and report anything defective.');
+  d.tasks.forEach(k=>(TASKS[k]?.steps||[]).filter((_,i)=>i===0&&['wah_scaff','mewp','lifting','excavation','electrical','hotworks','asbestos'].includes(k)).forEach(s=>L.push('- '+s)));
+  L.push('2. Setting up');
+  L.push('- Establish the work area, welfare and access routes; keep emergency routes clear.');
+  d.conds.forEach(k=>(CONDS[k]?.steps||[]).forEach(s=>L.push('- '+s)));
+  L.push('3. Carrying out the work');
+  if(d.scope) L.push('- Scope: '+d.scope.replace(/\s+/g,' ').trim());
+  d.tasks.forEach(k=>{ const st=TASKS[k]?.steps||[]; st.forEach((s,i)=>{ if(i===0&&['wah_scaff','mewp','lifting','excavation','electrical','hotworks','asbestos'].includes(k)) return; L.push('- '+s); }); });
+  L.push('- Supervisor monitors the work against this RAMS; stop work if conditions change and review the RAMS before restarting.');
+  L.push('4. Completion');
+  L.push('- Clear waste and materials, leave the area safe, and hand over to the site contact'+(d.contact?' ('+d.contact+')':'')+'.');
+  L.push('- Report any incident or near miss to the supervisor and '+S.settings.licensee+' the same day.');
+  return L.join('\n');
+}
+
+/* ================= State ================= */
+let S=null;
+const ui={view:'dash', ws:'all', f:{q:'',type:'',status:''}, wiz:null, docId:null, readySel:null, drawer:null, crewAll:false};
+let MODAL_OK=null;
+
+function save(){ if(DEMO) return; try{ localStorage.setItem(STORE, JSON.stringify(S)); }catch(e){} }
+function load(){
+  if(DEMO) return seed();
+  try{ const raw=localStorage.getItem(STORE); if(raw){ const o=JSON.parse(raw); if(o&&o.v===1&&Array.isArray(o.rams)) return o; } }catch(e){}
+  return seed();
+}
+const client = id => S.clients.find(c=>c.id===id);
+const person = id => S.crew.find(p=>p.id===id);
+const asset = id => S.assets.find(a=>a.id===id);
+const ramsById = id => S.rams.find(r=>r.id===id);
+const inWs = cid => ui.ws==='all' || cid===ui.ws;
+function latest(){ const m={}; S.rams.forEach(r=>{ if(!m[r.ref]||r.rev>m[r.ref].rev) m[r.ref]=r; }); return Object.values(m).sort((a,b)=>b.ref.localeCompare(a.ref)); }
+const revsOf = ref => S.rams.filter(r=>r.ref===ref).sort((a,b)=>b.rev-a.rev);
+function nextRef(pre='RAMS'){ const y=TODAY.slice(0,4); let max=0; S.rams.forEach(r=>{ const m=r.ref.match(new RegExp('^'+pre+'-'+y+'-(\\d+)$')); if(m) max=Math.max(max,+m[1]); }); return pre+'-'+y+'-'+String(max+1).padStart(4,'0'); }
+function log(msg){ S.log.unshift({t:new Date().toISOString(), msg}); if(S.log.length>300) S.log.length=300; }
+
+/* ================= Sample data ================= */
+function seed(){
+  const D=n=>addDays(TODAY,n);
+  const st={v:1, settings:{licensee:CFG.licensee, preparer:CFG.preparer}, clients:[], crew:[], assets:[], rams:[], log:[]};
+  st.clients=[
+    {id:'c1', name:'Brackmoor Roofing Ltd', coNo:'Sample client', colour:'#9A3B1F', initials:'BR', address:'Soham, Cambridgeshire', contact:'Dan Brackley', phone:'07700 900112', email:'office@brackmoor.example', hospital:'Addenbrooke’s Hospital A&E, Hills Road, Cambridge CB2 0QQ', assembly:'Site entrance gate', ppe:['Soft-soled safety footwear on roofs']},
+    {id:'c2', name:'Calder Fen Scaffolding Ltd', coNo:'Sample client', colour:'#2F5D50', initials:'CF', address:'March, Cambridgeshire', contact:'Priya Calder', phone:'07700 900245', email:'jobs@calderfen.example', hospital:'Peterborough City Hospital A&E, Bretton Gate, Peterborough PE3 9GZ', assembly:'Compound gate', ppe:['Harness and lanyard per SG4']},
+    {id:'c3', name:'Wrenfield Electrical Ltd', coNo:'Sample client', colour:'#4B3C8C', initials:'WE', address:'Newmarket, Suffolk', contact:'Tom Wrenfield', phone:'07700 900378', email:'admin@wrenfield.example', hospital:'West Suffolk Hospital A&E, Hardwick Lane, Bury St Edmunds IP33 2QZ', assembly:'Main car park', ppe:[]}
+  ];
+  const P=(id,cl,name,role,certs)=>({id,client:cl,name,role,certs});
+  st.crew=[
+    P('p1','c1','Liam Fenwick','Site supervisor',{CSCS:D(700),SMSTS:D(900),FAW:D(400),ASB:D(200),FIT:D(150),SLING:D(500)}),
+    P('p2','c1','Marek Nowak','Roofer',{CSCS:D(520),ASB:D(45),FIT:D(300)}),
+    P('p3','c1','Sam Oduya','Roofer',{CSCS:D(8),ASB:D(210)}),
+    P('p4','c1','Ellie Marsh','Labourer',{CSCS:D(610),EFAW:D(30),FIT:D(200)}),
+    P('p5','c2','Kev Dunmore','Scaffold supervisor',{CSCS:D(800),SSSTS:D(500),FAW:D(250),SLING:D(400),PASMA:D(380)}),
+    P('p6','c2','Josh Taylor','Scaffolder',{CSCS:D(600),SLING:D(-5)}),
+    P('p7','c2','Aaron Pike','Scaffolder',{CSCS:D(450)}),
+    P('p8','c3','Ravi Shah','Electrical supervisor',{ECS:D(900),SSSTS:D(300),FAW:D(-12),ASB:D(100),IPAF:D(500),FIT:D(60)}),
+    P('p9','c3','Chloe Benn','Electrician',{ECS:D(700),ASB:D(-30),FIT:D(200)}),
+    P('p10','c3','Dev Patel','Apprentice electrician',{CSCS:D(300),ASB:D(250)})
+  ];
+  const A=(id,cl,type,name,serial,next,status,extra)=>({id,client:cl,type,name,serial,next,last:addDays(next,-ASSET_TYPES[type].every),status:status||'S',job:null,note:'',hist:[],...(extra||{})});
+  st.assets=[
+    A('a1','c1','ladder','Combination ladder 3×9','BR-LAD-01',D(40)),
+    A('a2','c1','harness','Full body harness + restraint lanyard','BR-HAR-01',D(9)),
+    A('a3','c1','harness','Full body harness + restraint lanyard','BR-HAR-02',D(120)),
+    A('a4','c1','lifting','Scaffold hoist + slings','BR-LFT-01',D(60)),
+    A('a5','c1','powertool','Disc cutter 110V','BR-PT-01',D(-6)),
+    A('a6','c1','powertool','Cordless drill / driver set','BR-PT-02',D(70)),
+    A('a7','c1','firstaid','First aid kit (BS 8599-1, medium)','BR-FAK-01',D(25)),
+    A('a8','c1','vehicle','Ford Transit Custom','BR-VAN-01',D(150)),
+    A('a9','c1','extinguisher','CO₂ extinguisher 2 kg','BR-EXT-01',D(200)),
+    A('a10','c2','lifting','Gin wheel, rope & hooks','CF-LFT-01',D(30)),
+    A('a11','c2','harness','Scaffold harness + lanyard','CF-HAR-01',D(80)),
+    A('a12','c2','harness','Scaffold harness + lanyard','CF-HAR-02',D(-3)),
+    A('a13','c2','firstaid','First aid kit (BS 8599-1, large)','CF-FAK-01',D(50)),
+    A('a14','c2','vehicle','Iveco Daily dropside','CF-VAN-01',D(12)),
+    A('a15','c2','tower','Aluminium tower 6.2 m','CF-TWR-01',D(45)),
+    A('a16','c3','mewp','Scissor lift 8 m','WE-MEWP-01',D(90),'U',{note:'Hydraulic leak found on pre-use check'}),
+    A('a17','c3','tester','Voltage indicator, proving unit & lock-off kit','WE-TST-01',D(100)),
+    A('a18','c3','tester','Voltage indicator & proving unit','WE-TST-02',D(-20),'R',{note:'Sent for recalibration'}),
+    A('a19','c3','powertool','SDS drill 110V','WE-PT-01',D(35)),
+    A('a20','c3','extractor','M-class dust extractor','WE-DX-01',D(15)),
+    A('a21','c3','firstaid','First aid kit (BS 8599-1, small)','WE-FAK-01',D(60)),
+    A('a22','c3','harness','Full body harness + restraint lanyard','WE-HAR-01',D(140)),
+    A('a23','c3','vehicle','VW Transporter','WE-VAN-01',D(220))
+  ];
+  st.assets.forEach(a=>a.hist.push({t:dt(a.last).toISOString(), msg:ASSET_TYPES[a.type].insp+' passed'}));
+  S=st;
+  const mk=(o)=>{
+    const d=Object.assign({id:uid('r'), ref:'', rev:1, client:'', site:'', address:'', start:D(7), days:5, pc:'', contact:'', contactPhone:'', scope:'', preparedBy:CFG.preparer,
+      tasks:[], conds:[], crew:[], kit:[], risks:[], ppeExtra:'', hospital:'', assembly:'', method:'', methodEdited:false, status:'Draft', approver:'', approvedOn:'', note:'First issue', signoff:{}, created:'', updated:''}, o);
+    const c=client(d.client); d.hospital=d.hospital||c.hospital; d.assembly=d.assembly||c.assembly; d.contact=d.contact||c.contact; d.contactPhone=d.contactPhone||c.phone;
+    syncRisks(d); d.method=genMethod(d); st.rams.push(d); return d;
+  };
+  mk({ref:'RAMS-2026-0009', client:'c1', site:'Gutter & fascia replacement, The Old Rectory', address:'Haddenham, Cambridgeshire CB6', start:D(-40), days:4, pc:'Client (domestic)', scope:'Remove and replace uPVC gutters, fascias and soffits to the rear elevation from a mobile access tower.', tasks:['wah_tower','tools','manual'], conds:['weather'], crew:['p1','p2'], kit:['a1','a6','a7'], status:'Closed', approver:CFG.preparer, approvedOn:D(-46), created:D(-48)+'T09:00:00Z', updated:D(-35)+'T09:00:00Z'});
+  mk({ref:'RAMS-2026-0012', rev:1, client:'c1', site:'Re-roof, 14 Mill Lane', address:'Littleport, Cambridgeshire CB6', start:D(3), days:10, pc:'Brackmoor Roofing Ltd', scope:'Strip existing concrete tiles and battens, install new breathable membrane, battens and natural slate to main roof; replace lead flashings to chimney.', tasks:['wah_scaff','roof','tools','manual','coshh'], conds:['public','weather'], crew:['p1','p2','p3','p4'], kit:['a1','a2','a3','a6','a7','a8'], status:'Superseded', approver:CFG.preparer, approvedOn:D(-28), created:D(-30)+'T10:00:00Z', updated:D(-28)+'T15:00:00Z'});
+  mk({ref:'RAMS-2026-0012', rev:2, client:'c1', site:'Re-roof, 14 Mill Lane', address:'Littleport, Cambridgeshire CB6', start:D(3), days:10, pc:'Brackmoor Roofing Ltd', scope:'Strip existing concrete tiles and battens, install new breathable membrane, battens and natural slate to main roof; replace lead flashings to chimney. Materials raised by scaffold hoist.', tasks:['wah_scaff','roof','tools','manual','coshh','lifting'], conds:['public','weather'], crew:['p1','p2','p3','p4'], kit:['a1','a2','a3','a4','a6','a7','a8'], status:'Approved', approver:CFG.preparer, approvedOn:D(-2), note:'Added scaffold hoist (lifting operations) and second harness.', created:D(-3)+'T11:00:00Z', updated:D(-2)+'T16:20:00Z'});
+  const r15=mk({ref:'RAMS-2026-0015', client:'c2', site:'Scaffold erection, Elm Court flats', address:'Wisbech, Cambridgeshire PE13', start:D(1), days:5, pc:'Northgate Build Ltd (sample)', scope:'Erect independent tied scaffold to the front and side elevations of a three-storey block for window replacement. Loading bay at first lift.', tasks:['wah_scaff','lifting','manual'], conds:['public','occupied','traffic'], crew:['p5','p6','p7'], kit:['a10','a11','a13','a14'], status:'Approved', approver:CFG.preparer, approvedOn:D(-6), created:D(-8)+'T09:30:00Z', updated:D(-6)+'T12:00:00Z'});
+  r15.signoff={p5:new Date(Date.now()-864e5).toISOString(), p6:new Date(Date.now()-864e5).toISOString(), p7:new Date(Date.now()-864e5+600000).toISOString()};
+  mk({ref:'RAMS-2026-0016', client:'c3', site:'Distribution board replacement, Hartford Primary School', address:'St Ives, Cambridgeshire PE27', start:D(6), days:3, pc:'Cambs Schools Estates (sample)', scope:'Isolate and replace the main distribution board and two sub-boards in the plant room; chase new containment in the hall ceiling void from a scissor lift during half-term.', tasks:['electrical','tools','dust','asbestos','mewp'], conds:['occupied','public'], crew:['p8','p9','p10'], kit:['a16','a17','a19','a20','a21','a22'], status:'In review', created:D(-1)+'T14:00:00Z', updated:D(-1)+'T17:45:00Z'});
+  mk({ref:'RAMS-2026-0017', client:'c2', site:'Temporary roof scaffold, Unit 7 Fenland Way', address:'Chatteris, Cambridgeshire PE16', start:D(20), days:15, pc:'Fenland Way Developments (sample)', scope:'Design scaffold with temporary roof over a warehouse unit during re-cladding.', tasks:['wah_scaff','lifting','manual'], conds:['weather','traffic'], status:'Draft', created:TODAY+'T08:30:00Z', updated:TODAY+'T08:30:00Z'});
+  st.log=[
+    {t:TODAY+'T08:30:00Z', msg:'RAMS-2026-0017 Rev 1 saved as Draft (Calder Fen Scaffolding Ltd)'},
+    {t:D(-1)+'T17:45:00Z', msg:'RAMS-2026-0016 Rev 1 sent for review (Wrenfield Electrical Ltd)'},
+    {t:D(-1)+'T09:10:00Z', msg:'Briefing for RAMS-2026-0015 signed by 3 of 3 crew'},
+    {t:D(-2)+'T16:20:00Z', msg:'RAMS-2026-0012 Rev 2 approved by '+CFG.preparer},
+    {t:D(-4)+'T10:05:00Z', msg:'WE-MEWP-01 Scissor lift 8 m quarantined: hydraulic leak found on pre-use check'}
+  ];
+  if(RAMSONLY){
+    st.crew=[]; st.assets=[];
+    const fa={c1:'Liam Fenwick (FAW)', c2:'Kev Dunmore (FAW)', c3:'Ravi Shah (FAW refresher booked)'};
+    st.rams.forEach(r=>{ r.crew=[]; r.kit=[]; r.signoff={}; r.firstAider=fa[r.client]||''; });
+    st.log=st.log.filter(l=>!/Briefing|quarantined/.test(l.msg));
+  }
+  if(READYONLY){
+    st.settings.licensee='Brackmoor Roofing Ltd';
+    st.clients=st.clients.filter(c=>c.id==='c1');
+    st.crew=st.crew.filter(p=>p.client==='c1');
+    st.crew.push(P('p11','c1','Gary Holt','Roofer / MEWP operator',{CSCS:D(400),IPAF:D(600),PASMA:D(300),ASB:D(180)}), P('p12','c1','Nina Price','Labourer',{CSCS:D(-15),ASB:D(90)}));
+    st.assets=st.assets.filter(a=>a.client==='c1');
+    const extra=[A('a24','c1','mewp','Boom lift 12 m (hired)','BR-MEWP-01',D(75)), A('a25','c1','tower','Aluminium tower 4.2 m','BR-TWR-01',D(50)), A('a26','c1','firstaid','First aid kit (BS 8599-1, small)','BR-FAK-02',D(80)), A('a27','c1','harness','Full body harness + restraint lanyard','BR-HAR-03',D(160))];
+    extra.forEach(a=>{ a.hist.push({t:dt(a.last).toISOString(), msg:ASSET_TYPES[a.type].insp+' passed'}); st.assets.push(a); });
+    st.rams=[];
+    const appr='Jo Hart CMIOSH (Fenline Safety Consulting)';
+    mk({ref:'JOB-2026-0031', ramsRef:'RAMS-2026-0012 Rev 2', client:'c1', site:'Re-roof, 14 Mill Lane', address:'Littleport, Cambridgeshire CB6', start:D(3), days:10, tasks:['wah_scaff','roof','tools','manual','coshh','lifting'], conds:['public','weather'], crew:['p1','p2','p3','p4'], kit:['a1','a2','a3','a4','a6','a7','a8'], status:'Approved', approver:appr, approvedOn:D(-2), created:D(-3)+'T11:00:00Z', updated:D(-2)+'T16:20:00Z'});
+    const j2=mk({ref:'JOB-2026-0032', ramsRef:'RAMS-2026-0019 Rev 1', client:'c1', site:'Chimney repoint & flashing, 3 Station Road', address:'Ely, Cambridgeshire CB7', start:D(1), days:2, tasks:['mewp','manual'], conds:['public','traffic'], crew:['p1','p11'], kit:['a24','a27','a26'], status:'Approved', approver:appr, approvedOn:D(-1), created:D(-4)+'T09:00:00Z', updated:D(-1)+'T10:00:00Z'});
+    j2.signoff={p1:new Date(Date.now()-36e5).toISOString(), p11:new Date(Date.now()-35e5).toISOString()};
+    mk({ref:'JOB-2026-0033', ramsRef:'', client:'c1', site:'Flat roof replacement, Unit 2 Lark Road', address:'Mildenhall, Suffolk IP28', start:D(9), days:6, tasks:['roof','hotworks','manual'], conds:['weather'], crew:['p2','p4','p12'], kit:['a1','a9'], status:'Draft', created:TODAY+'T08:00:00Z', updated:TODAY+'T08:00:00Z'});
+    mk({ref:'JOB-2026-0027', ramsRef:'RAMS-2026-0009 Rev 1', client:'c1', site:'Gutter & fascia replacement, The Old Rectory', address:'Haddenham, Cambridgeshire CB6', start:D(-40), days:4, tasks:['wah_tower','tools','manual'], crew:['p1','p2'], kit:['a25','a6','a7'], status:'Closed', approver:appr, approvedOn:D(-46), created:D(-48)+'T09:00:00Z', updated:D(-35)+'T09:00:00Z'});
+    st.log=[
+      {t:TODAY+'T08:00:00Z', msg:'JOB-2026-0033 added: Flat roof replacement, Unit 2 Lark Road (RAMS requested from consultant)'},
+      {t:new Date(Date.now()-35e5).toISOString(), msg:'Briefing for JOB-2026-0032 signed by 2 of 2 crew'},
+      {t:D(-2)+'T16:20:00Z', msg:'JOB-2026-0031 RAMS-2026-0012 Rev 2 received, approved by Jo Hart CMIOSH'},
+      {t:D(-4)+'T10:05:00Z', msg:'BR-PT-01 Disc cutter 110V PAT test overdue'}
+    ];
+  }
+  return st;
+}
+
+/* ================= Readiness engine ================= */
+function bestCert(p, list){ let b=null; list.forEach(c=>{ const e=p.certs?.[c]; if(e&&(!b||e>b.e)) b={c,e}; }); return b; }
+function certTag(b){ if(!b) return '<span class="tag">—</span>'; const d=diff(TODAY,b.e); const cls=d<0?'bad':d<=60?'warn':'ok'; return `<span class="tag ${cls}" title="${esc(CERTS[b.c].l)} expires ${fmt(b.e)}">${esc(CERTS[b.c].s)} ${fmtS(b.e)}</span>`; }
+function evalReq(q, people, start, end){
+  if(!people.length) return {lvl:'fail', msg:'No crew assigned yet'};
+  const rows=people.map(p=>({p, b:bestCert(p,q.c)}));
+  const nm=x=>esc(x.p.name)+' ('+esc(CERTS[x.b.c].s)+' to '+fmt(x.b.e)+')';
+  if(q.who==='one'){
+    const full=rows.filter(x=>x.b&&x.b.e>=end);
+    if(full.length) return {lvl:'pass', msg:'Held by '+full.map(nm).join(', ')};
+    const part=rows.filter(x=>x.b&&x.b.e>=start);
+    if(part.length) return {lvl:'warn', msg:part.map(nm).join(', ')+'. Expires during the job.'};
+    const exp=rows.filter(x=>x.b);
+    return {lvl:'fail', msg: exp.length ? 'Expired: '+exp.map(x=>esc(x.p.name)+' ('+fmt(x.b.e)+')').join(', ') : 'Nobody in the crew holds this'};
+  }
+  const bad=rows.filter(x=>!x.b||x.b.e<start), mid=rows.filter(x=>x.b&&x.b.e>=start&&x.b.e<end);
+  if(bad.length) return {lvl:'fail', msg:'Missing or expired: '+bad.map(x=>esc(x.p.name)+(x.b?' (expired '+fmt(x.b.e)+')':' (none held)')).join(', ')};
+  if(mid.length) return {lvl:'warn', msg:'Expires during the job: '+mid.map(nm).join(', ')};
+  return {lvl:'pass', msg:'All '+rows.length+' crew hold a valid card'};
+}
+function assetIssue(a, r){
+  const start=r.start, end=jobEnd(r), T=ASSET_TYPES[a.type];
+  if(a.status==='U') return {lvl:'fail', msg:'Quarantined'+(a.note?': '+esc(a.note):'')};
+  if(a.status==='R') return {lvl:'fail', msg:'At repair'+(a.note?': '+esc(a.note):'')};
+  if(a.next<start) return {lvl:'fail', msg:T.insp+(a.next<TODAY?' overdue since ':' runs out before the start, on ')+fmt(a.next)};
+  if(a.next<end) return {lvl:'warn', msg:T.insp+' runs out mid-job ('+fmt(a.next)+')'};
+  if(a.status==='D'&&a.job&&a.job!==r.ref) return {lvl:'warn', msg:'Booked out to '+esc(a.job)};
+  const clash=latest().find(o=>o.ref!==r.ref&&!['Closed','Superseded'].includes(o.status)&&o.kit.includes(a.id)&&o.start<=end&&r.start<=jobEnd(o));
+  if(clash) return {lvl:'warn', msg:'Also allocated to '+esc(clash.ref)+' ('+fmt(clash.start)+' to '+fmt(jobEnd(clash))+')'};
+  return {lvl:'pass', msg:T.insp+' valid to '+fmt(a.next)};
+}
+function assess(r){
+  const checks=[]; const start=r.start, end=jobEnd(r);
+  const add=(grp,lvl,t,p)=>checks.push({grp,lvl,t,p});
+  // Document
+  if(r.status==='Approved') add('Document','pass','RAMS approved',(READYONLY?esc(r.ramsRef||'RAMS'):'Rev '+r.rev)+' approved by '+esc(r.approver||'—')+' on '+fmt(r.approvedOn));
+  else if(r.status==='Closed') add('Document','info','Job closed','This job has been closed.');
+  else if(READYONLY) add('Document','fail','No approved RAMS yet','Work can’t start until the approved RAMS is received from your H&S consultant.');
+  else add('Document','fail','RAMS not approved','Status is '+esc(r.status)+'. Work cannot start on an unapproved RAMS.');
+  const hr=highestResidual(r);
+  if(READYONLY){}
+  else if(hr==='H') add('Document','fail','High residual risk','At least one hazard is still High after controls. Add controls before approval.');
+  else add('Document','pass','Residual risk acceptable','Highest residual risk is '+(BANDN[hr]||'—')+'.');
+  if(r.status==='Approved'&&r.approvedOn&&diff(r.approvedOn,TODAY)>365) add('Document','warn','Review overdue','Approved over 12 months ago. Review before reuse.');
+  if(end<TODAY) add('Document','info','Job finished','Planned end was '+fmt(end)+'.');
+  else if(start<=TODAY) add('Document','info','Job in progress','Started '+fmt(start)+', planned end '+fmt(end)+'.');
+  // Competence
+  const people=r.crew.map(person).filter(Boolean);
+  if(!people.length) add('Competence','fail','No crew assigned','Assign the operatives who will do the work.');
+  reqsFor(r).forEach(q=>{ const e=evalReq(q,people,start,end); add('Competence',e.lvl,esc(q.why),e.msg); });
+  // Kit
+  const items=r.kit.map(asset).filter(Boolean);
+  kitFor(r).forEach(t=>{ if(!items.some(a=>a.type===t)) add('Plant & equipment','fail','No '+esc(ASSET_TYPES[t].l.toLowerCase())+' allocated','Required for the selected work.'); });
+  const kitRows=items.map(a=>({a, ...assetIssue(a,r)}));
+  const kf=kitRows.filter(x=>x.lvl==='fail'), kw=kitRows.filter(x=>x.lvl==='warn');
+  if(items.length){
+    if(kf.length) kf.forEach(x=>add('Plant & equipment','fail',esc(x.a.serial)+' '+esc(x.a.name),x.msg));
+    if(kw.length) kw.forEach(x=>add('Plant & equipment','warn',esc(x.a.serial)+' '+esc(x.a.name),x.msg));
+    if(!kf.length&&!kw.length) add('Plant & equipment','pass','All '+items.length+' items in date','Every allocated item is available and its inspection covers the job.');
+  }
+  // Briefing & emergency
+  const signed=people.filter(p=>r.signoff?.[p.id]).length;
+  if(people.length){
+    if(signed===people.length) add('Briefing','pass','Briefing signed','All '+people.length+' crew have signed the RAMS briefing.');
+    else add('Briefing','warn','Briefing not complete',signed+' of '+people.length+' signed. Brief and sign before work starts.');
+  }
+  if(!r.hospital) add('Briefing','warn','Nearest A&E missing','Add the nearest A&E to the emergency arrangements.');
+  const lv=checks.map(c=>c.lvl);
+  const verdict = r.status==='Closed' ? 'closed' : lv.includes('fail') ? 'no' : lv.includes('warn') ? 'caveat' : 'ok';
+  return {checks, verdict, kitRows, people, start, end};
+}
+const VERD = {ok:{t:'READY', s:'All checks passed', c:'s'}, caveat:{t:'READY WITH CAVEATS', s:'Clear the amber items', c:'r'}, no:{t:'NOT READY', s:'Fix the red items first', c:'u'}, closed:{t:'CLOSED', s:'Job closed', c:'n'}};
+const vChip = r => { const v=assess(r).verdict; const m={ok:'Ready',caveat:'Caveats',no:'Not ready',closed:'Closed'}; return `<span class="chip ${VERD[v].c}">${m[v]}</span>`; };
+
+/* ================= Alerts ================= */
+function alerts(){
+  const out=[];
+  S.assets.filter(a=>inWs(a.client)).forEach(a=>{
+    const d=diff(TODAY,a.next), T=ASSET_TYPES[a.type];
+    if(a.status==='U') out.push({lvl:'u',k:'Quarantined',t:a.serial+' '+a.name,s:a.note||'Quarantined',act:'openAsset',id:a.id,o:0});
+    else if(d<0) out.push({lvl:'u',k:'Overdue',t:a.serial+' '+a.name,s:T.insp+' was due '+fmt(a.next),act:'openAsset',id:a.id,o:1});
+    else if(d<=14) out.push({lvl:'r',k:'Due '+d+'d',t:a.serial+' '+a.name,s:T.insp+' due '+fmt(a.next),act:'openAsset',id:a.id,o:3});
+  });
+  S.crew.filter(p=>inWs(p.client)).forEach(p=>Object.entries(p.certs).forEach(([c,e])=>{
+    const d=diff(TODAY,e);
+    if(d<0) out.push({lvl:'u',k:'Expired',t:p.name+': '+CERTS[c].l,s:'Expired '+fmt(e),act:'openPerson',id:p.id,o:1});
+    else if(d<=30) out.push({lvl:'r',k:'Expires '+d+'d',t:p.name+': '+CERTS[c].l,s:'Expires '+fmt(e),act:'openPerson',id:p.id,o:3});
+  }));
+  latest().filter(r=>inWs(r.client)).forEach(r=>{
+    const soonish=r.start>=TODAY&&diff(TODAY,r.start)<=14;
+    if(r.status==='In review'||(r.status==='Draft'&&soonish)) out.push({lvl:'i',k:READYONLY?'No RAMS':r.status==='Draft'?'Draft':'Approve',t:r.ref+' '+r.site,s:(READYONLY?'No approved RAMS yet':r.status==='Draft'?'Still a draft':'Waiting for approval')+', starts '+fmt(r.start),act:'openRams',id:r.id,o:2});
+    else if(!RAMSONLY&&r.status==='Approved'&&r.start>=TODAY&&diff(TODAY,r.start)<=7&&assess(r).verdict==='no') out.push({lvl:'u',k:'Not ready',t:r.ref+' '+r.site,s:'Starts '+fmt(r.start),act:'goReady',id:r.id,o:0});
+  });
+  return out.sort((a,b)=>a.o-b.o);
+}
+function counts(){
+  const L=latest().filter(r=>inWs(r.client));
+  return {
+    rams:L.filter(r=>r.status==='Draft'||r.status==='In review').length,
+    kit:S.assets.filter(a=>inWs(a.client)&&(a.status==='U'||diff(TODAY,a.next)<=14)).length,
+    crew:S.crew.filter(p=>inWs(p.client)&&Object.values(p.certs).some(e=>diff(TODAY,e)<=30)).length
+  };
+}
+
+/* ================= Theme ================= */
+const THEME_KEY='rams-readiness.theme';
+function curTheme(){ const t=document.documentElement.dataset.theme; if(t==='dark'||t==='light') return t; try{ return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; }catch(e){ return 'light'; } }
+function setTheme(t){ document.documentElement.dataset.theme=t; try{ localStorage.setItem(THEME_KEY,t); }catch(e){} }
+try{ const t=localStorage.getItem(THEME_KEY); if(t==='dark'||t==='light') document.documentElement.dataset.theme=t; }catch(e){}
+
+/* ================= Shell ================= */
+const NAV = FULL ? [['dash','Overview'],['new','New RAMS'],['rams','RAMS register','rams'],['ready','Readiness check'],'-',['clients','Clients'],['kit','Kit & vehicles','kit'],['crew','Crew & competence','crew'],'-',['log','Activity log'],['settings','Settings & licence']]
+  : RAMSONLY ? [['dash','Overview'],['new','New RAMS'],['rams','RAMS register','rams'],'-',['clients','Clients'],'-',['log','Activity log'],['settings','Settings & licence']]
+  : [['dash','Overview'],['rams','Jobs','rams'],['ready','Readiness check'],'-',['kit','Kit & vehicles','kit'],['crew','Crew & competence','crew'],'-',['log','Activity log'],['settings','Settings & licence']];
+function renderShell(){
+  const c=counts();
+  $('#logo').textContent=PRODUCT.logo; $('#pname').textContent=PRODUCT.name; document.title=PRODUCT.name;
+  $('.ws').style.display=READYONLY?'none':'';
+  const dark=curTheme()==='dark';
+  $('#nav').innerHTML=NAV.map(n=>n==='-'?'<div class="sep"></div>':`<button data-act="go" data-arg="${n[0]}" class="${(ui.view===n[0]||(n[0]==='new'&&ui.view==='wizard')||(n[0]==='rams'&&ui.view==='doc'))?'active':''}">${n[1]}${n[2]&&c[n[2]]?`<span class="count">${c[n[2]]}</span>`:''}</button>`).join('')+`<div class="sep"></div><button class="theme" data-act="theme" aria-label="Switch to ${dark?'light':'dark'} mode">${dark?'Light mode':'Dark mode'}${dark?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>'}</button>`;
+  $('#ws').innerHTML=opt('all','All clients',ui.ws==='all')+S.clients.map(x=>opt(x.id,x.name,ui.ws===x.id)).join('');
+  $('#licensee').textContent=S.settings.licensee;
+  $('#sidefoot').innerHTML=`Licensed to <b>${esc(S.settings.licensee)}</b><br>Licence <span class="mono">${esc(CFG.licence)}</span><br>Sample data, fictional ${READYONLY?'company':'clients'}<br>&copy; ${esc(CFG.vendor)} 2026 &middot; <a href="${CFG.vendorSite}" target="_blank" rel="noopener">emilendres.com</a>`;
+}
+function render(keepScroll){
+  renderShell();
+  const v=VIEWS[ui.view]||VIEWS.dash;
+  $('#main').innerHTML=(DEMO?`<div class="demo-bar"><b>Live demo</b> with sample data. Nothing is saved: reload to reset. Want it for your business? <a href="mailto:emil@emilendres.com?subject=${encodeURIComponent(PRODUCT.name+' demo')}">emil@emilendres.com</a></div>`:'')+v();
+  if(!keepScroll) window.scrollTo(0,0);
+}
+const head=(t,p,right='')=>`<div class="top"><div><h1>${t}</h1>${p?`<p>${p}</p>`:''}</div><div class="right">${right}<span class="date">${fmt(TODAY)}</span></div></div>`;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ================= Views ================= */
+const VIEWS={};
+
+VIEWS.dash=()=>{
+  const L=latest().filter(r=>inWs(r.client));
+  const live=L.filter(r=>r.status==='Approved'&&jobEnd(r)>=TODAY).length;
+  const pend=L.filter(r=>r.status==='Draft'||r.status==='In review').length;
+  const soon=L.filter(r=>!['Closed','Superseded'].includes(r.status)&&r.start>=TODAY&&diff(TODAY,r.start)<=14);
+  const soonNo=RAMSONLY?soon.filter(r=>r.status!=='Approved').length:soon.filter(r=>assess(r).verdict==='no').length;
+  const reviewDue=L.filter(r=>r.status==='Approved'&&r.approvedOn&&diff(r.approvedOn,TODAY)>335).length;
+  const chipFor=r=>RAMSONLY?`<span class="chip ${RSTATUS[r.status]}">${esc(r.status)}</span>`:vChip(r);
+  const A=S.assets.filter(a=>inWs(a.client));
+  const aOver=A.filter(a=>a.next<TODAY||a.status==='U').length, aDue=A.filter(a=>a.next>=TODAY&&diff(TODAY,a.next)<=30).length;
+  let cExp=0,cSoon=0; S.crew.filter(p=>inWs(p.client)).forEach(p=>Object.values(p.certs).forEach(e=>{ const d=diff(TODAY,e); if(d<0)cExp++; else if(d<=60)cSoon++; }));
+  const up=L.filter(r=>!['Closed','Superseded'].includes(r.status)&&jobEnd(r)>=TODAY).sort((a,b)=>a.start.localeCompare(b.start));
+  const al=alerts();
+  const clients=S.clients.filter(c=>inWs(c.id));
+  const meter=(n,d)=>{ const p=d?Math.round(n/d*100):100; return `<div class="meter"><div class="minibar"><i class="${p<70?'low':p<90?'mid':''}" style="width:${p}%"></i></div><span>${p}%</span></div>`; };
+  const sub = READYONLY ? 'Every job, crew card and item of kit in one view: what’s ready to start and what will stop a job.'
+    : ui.ws!=='all' ? 'Workspace: '+esc(client(ui.ws)?.name)
+    : RAMSONLY ? 'Every client you manage, in one view: what’s approved, what’s waiting and what starts soon.'
+    : 'Every client you manage, in one view: what’s approved, what’s starting soon, and what will stop a job.';
+  const tail = RAMSONLY ? `
+    <button class="tile ${reviewDue?'warn':''}" data-act="go" data-arg="rams"><span class="n">${reviewDue}</span><span class="l">Due for review</span><small>Approved over 11 months ago</small></button>
+    <button class="tile" data-act="go" data-arg="clients"><span class="n">${S.clients.length}</span><span class="l">Client workspaces</span><small>Each with its own letterhead</small></button>` : `
+    <button class="tile ${aOver?'bad':aDue?'warn':''}" data-act="go" data-arg="kit"><span class="n">${aOver}</span><span class="l">Kit out of service</span><small>Overdue or quarantined · ${aDue} due in 30 days</small></button>
+    <button class="tile ${cExp?'bad':cSoon?'warn':''}" data-act="go" data-arg="crew"><span class="n">${cExp}</span><span class="l">Expired cards</span><small>${cSoon} expiring in 60 days</small></button>`;
+  return head('Overview', sub)+`
+  <div class="kpis">
+    <button class="tile good" data-act="go" data-arg="rams"><span class="n">${live}</span><span class="l">${READYONLY?'Live jobs':'Live RAMS'}</span><small>${READYONLY?'RAMS approved, job not finished':'Approved, job not finished'}</small></button>
+    <button class="tile ${pend?'warn':''}" data-act="go" data-arg="rams"><span class="n">${pend}</span><span class="l">${READYONLY?'Waiting for RAMS':'Awaiting approval'}</span><small>${READYONLY?'No approved RAMS yet':'Draft or in review'}</small></button>
+    <button class="tile ${soonNo?'bad':''}" data-act="go" data-arg="${RAMSONLY?'rams':'ready'}"><span class="n">${soon.length}</span><span class="l">Starting in 14 days</span><small>${soonNo} ${RAMSONLY?'not approved':'not ready'}</small></button>${tail}
+  </div>
+  <div class="grid g-2">
+    <div class="panel"><h2>Upcoming and live jobs <small>readiness on today’s data</small></h2>
+      ${up.length?up.map(r=>{ const c=client(r.client); return `<div class="row click" data-act="goReady" data-arg="${r.id}"><div><div class="nm"><span class="dot" style="background:${esc(c?.colour)}"></span>${esc(r.site)}</div><div class="meta"><span class="mono">${esc(r.ref)}${READYONLY?'':' Rev '+r.rev}</span> · ${READYONLY?'RAMS '+(esc(r.ramsRef)||'awaited'):esc(c?.name)} · ${fmt(r.start)}, ${r.days} day${r.days>1?'s':''}</div></div><div>${chipFor(r)}</div></div>`; }).join(''):'<div class="empty">No upcoming jobs.</div>'}
+    </div>
+    <div class="panel"><h2>Needs attention <small>${al.length} item${al.length===1?'':'s'}</small></h2>
+      ${al.length?al.slice(0,9).map(a=>`<button class="alert" data-act="${a.act}" data-arg="${a.id}"><span class="chip ${a.lvl}">${esc(a.k)}</span><span class="what">${esc(a.t)}<small>${esc(a.s)}</small></span></button>`).join(''):'<div class="empty">Nothing needs attention.</div>'}
+      ${al.length>9?`<p class="hint">${al.length-9} more in Kit & vehicles and Crew & competence.</p>`:''}
+    </div>
+  </div>
+  ${FULL?`<div class="panel" style="margin-top:18px"><h2>Compliance by client <small>kit in date · crew cards valid</small></h2>
+    ${clients.map(c=>{ const a=S.assets.filter(x=>x.client===c.id); const ok=a.filter(x=>x.next>=TODAY&&x.status!=='U'&&x.status!=='R').length; let cv=0,ct=0; S.crew.filter(p=>p.client===c.id).forEach(p=>Object.values(p.certs).forEach(e=>{ct++; if(e>=TODAY)cv++;})); return `<div class="cl-row"><div><span class="dot" style="background:${esc(c.colour)}"></span><b>${esc(c.name)}</b></div><div><span class="hint">Kit ${ok}/${a.length}</span>${meter(ok,a.length)}</div><div><span class="hint">Cards ${cv}/${ct}</span>${meter(cv,ct)}</div></div>`; }).join('')}
+  </div>`:''}`;
+};
+
+/* ---------- RAMS register ---------- */
+VIEWS.rams=()=>{
+  if(READYONLY) return head('Jobs','Each job with its dates, the RAMS it works to, the crew and the kit. The readiness check uses all of it.',
+    `<button class="btn" data-act="exportRams">Export CSV</button><button class="btn primary" data-act="editJob" data-arg="">New job</button>`)+`
+  <div class="toolbar"><input type="search" placeholder="Search job, site, RAMS ref…" value="${esc(ui.f.q)}" data-on="q" aria-label="Search">
+    <select data-on="status" aria-label="Status">${opt('','All jobs',!ui.f.status)}${['Draft','Approved','Closed'].map(s=>opt(s,stLabel(s),ui.f.status===s)).join('')}</select></div>
+  <div class="tablewrap" id="tbl">${jobsTable()}</div>`;
+  return head('RAMS register','Latest revision of every RAMS. Open one to see its history, issue a new revision or run the readiness check.',
+    `<button class="btn" data-act="exportRams">Export CSV</button><button class="btn primary" data-act="go" data-arg="new">New RAMS</button>`)+`
+  <div class="toolbar"><input type="search" placeholder="Search ref, site, client…" value="${esc(ui.f.q)}" data-on="q" aria-label="Search">
+    <select data-on="status" aria-label="Status">${opt('','All statuses',!ui.f.status)}${Object.keys(RSTATUS).filter(s=>s!=='Superseded').map(s=>opt(s,s,ui.f.status===s)).join('')}</select></div>
+  <div class="tablewrap" id="tbl">${ramsTable()}</div>`;
+};
+function ramsTable(){
+  const q=ui.f.q.toLowerCase();
+  const R=latest().filter(r=>inWs(r.client)&&(!ui.f.status||r.status===ui.f.status)&&(!q||(r.ref+' '+r.site+' '+client(r.client)?.name+' '+r.address).toLowerCase().includes(q)));
+  if(!R.length) return '<div class="empty">No RAMS match.</div>';
+  return `<table><thead><tr><th>Ref</th><th>Rev</th><th>Client</th><th>Site / job</th><th>Start</th><th>Days</th><th>Status</th><th>Highest residual</th>${RAMSONLY?'':'<th>Readiness</th>'}<th>Updated</th></tr></thead><tbody>${R.map(r=>{ const c=client(r.client); const hr=highestResidual(r); return `<tr class="click" data-act="openRams" data-arg="${r.id}"><td class="mono">${esc(r.ref)}</td><td class="mono">${r.rev}</td><td><span class="dot" style="background:${esc(c?.colour)}"></span>${esc(c?.name)}</td><td>${esc(r.site)}</td><td class="mono">${fmt(r.start)}</td><td class="mono">${r.days}</td><td><span class="chip ${RSTATUS[r.status]}">${esc(r.status)}</span></td><td>${hr?`<span class="rb ${hr}">${BANDN[hr]}</span>`:'—'}</td>${RAMSONLY?'':`<td>${r.status==='Closed'?'—':vChip(r)}</td>`}<td class="mono">${r.updated?fmt(r.updated.slice(0,10)):'—'}</td></tr>`; }).join('')}</tbody></table>`;
+}
+function jobsTable(){
+  const q=ui.f.q.toLowerCase();
+  const R=latest().filter(r=>(!ui.f.status||r.status===ui.f.status||(ui.f.status==='Draft'&&r.status==='In review'))&&(!q||(r.ref+' '+r.site+' '+r.address+' '+(r.ramsRef||'')).toLowerCase().includes(q))).sort((a,b)=>b.start.localeCompare(a.start));
+  if(!R.length) return '<div class="empty">No jobs match.</div>';
+  return `<table><thead><tr><th>Job</th><th>Site</th><th>Start</th><th>Days</th><th>Crew</th><th>Kit</th><th>RAMS</th><th>Readiness</th></tr></thead><tbody>${R.map(r=>`<tr class="click" data-act="openRams" data-arg="${r.id}"><td class="mono">${esc(r.ref)}</td><td>${esc(r.site)}</td><td class="mono">${fmt(r.start)}</td><td class="mono">${r.days}</td><td class="mono">${r.crew.length}</td><td class="mono">${r.kit.length}</td><td><span class="mono">${esc(r.ramsRef)||'—'}</span> <span class="chip ${RSTATUS[r.status]}">${esc(stLabel(r.status))}</span></td><td>${r.status==='Closed'?'—':vChip(r)}</td></tr>`).join('')}</tbody></table>`;
+}
+function drawerJob(id){
+  const r=ramsById(id); if(!r) return;
+  openDrawer(`<header><div class="id">${esc(r.ref)}</div><h3>${esc(r.site)}</h3><span class="chip ${RSTATUS[r.status]}">${esc(stLabel(r.status))}</span> ${r.status!=='Closed'?vChip(r):''}</header>
+  <div class="body">
+    <dl class="kv"><dt>Address</dt><dd>${esc(r.address)||'—'}</dd><dt>Dates</dt><dd>${fmt(r.start)} to ${fmt(jobEnd(r))} (${r.days} day${r.days>1?'s':''})</dd><dt>RAMS</dt><dd>${esc(r.ramsRef)||'Not received yet'}${r.approvedOn?'<br>Approved by '+esc(r.approver)+', '+fmt(r.approvedOn):''}</dd><dt>Activities</dt><dd>${r.tasks.map(k=>esc(TASKS[k]?.l)).join(', ')||'—'}</dd><dt>Crew</dt><dd>${r.crew.map(person).filter(Boolean).map(p=>esc(p.name)).join(', ')||'—'}</dd><dt>Kit</dt><dd>${r.kit.map(asset).filter(Boolean).map(a=>esc(a.serial)).join(', ')||'—'}</dd><dt>Nearest A&E</dt><dd>${esc(r.hospital)||'—'}</dd></dl>
+    <div class="actions">
+      ${r.status!=='Closed'?`<button class="btn primary" data-act="goReady" data-arg="${r.id}">Readiness check</button>`:''}
+      <button class="btn" data-act="editJob" data-arg="${r.id}">Edit job</button>
+      ${r.status==='Approved'?`<button class="btn" data-act="closeRams" data-arg="${r.id}">Close job</button>`:''}
+      <button class="btn danger" data-act="delJob" data-arg="${r.id}">Delete job</button>
+    </div>
+  </div>`);
+}
+function drawerJobEdit(id){
+  const c0=S.clients[0]||{};
+  const r=id?ramsById(id):{ref:'',site:'',address:'',start:addDays(TODAY,7),days:3,ramsRef:'',status:'Draft',approver:'',hospital:c0.hospital||'',tasks:[],crew:[],kit:[]};
+  if(!r) return;
+  const box=(name,val,on,html)=>`<label><input type="checkbox" name="${name}" value="${esc(val)}" ${on?'checked':''}>${html}</label>`;
+  openDrawer(`<header><div class="id">${id?esc(r.ref):'New job'}</div><h3>${esc(r.site)||'Add job'}</h3></header><div class="body" id="jform">
+    <div class="fields" style="grid-template-columns:1fr">
+      ${fld('Site / job name',`<input name="site" value="${esc(r.site)}">`,'',true)}
+      ${fld('Address',`<input name="address" value="${esc(r.address)}">`)}
+      <div class="fields">${fld('Start date',`<input type="date" name="start" value="${esc(r.start)}">`)}${fld('Working days',`<input type="number" min="1" name="days" value="${esc(r.days)}">`)}</div>
+      <div class="fields">${fld('RAMS reference',`<input name="ramsRef" value="${esc(r.ramsRef||'')}" placeholder="From your H&S consultant">`)}${fld('RAMS status',`<select name="status">${opt('Draft','Awaiting RAMS',r.status!=='Approved')}${opt('Approved','Approved',r.status==='Approved')}</select>`)}</div>
+      ${fld('RAMS approved by',`<input name="approver" value="${esc(r.approver)}" placeholder="Name, qualification">`)}
+      ${fld('Nearest A&E',`<input name="hospital" value="${esc(r.hospital)}">`)}
+    </div>
+    <div class="sub-h">Work activities <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">set which cards and kit the job needs</span></div>
+    <div class="pick">${Object.entries(TASKS).map(([k,t])=>box('tasks',k,r.tasks.includes(k),`<span>${esc(t.l)}</span><span></span>`)).join('')}</div>
+    <div class="sub-h">Crew</div>
+    <div class="pick">${S.crew.map(p=>box('crew',p.id,r.crew.includes(p.id),`<span><b>${esc(p.name)}</b> <span class="sub">${esc(p.role)}</span><br>${Object.keys(p.certs).map(c=>certTag({c,e:p.certs[c]})).join('')}</span><span></span>`)).join('')||'<div class="empty">Add crew first.</div>'}</div>
+    <div class="sub-h">Kit & vehicles</div>
+    <div class="pick">${S.assets.map(a=>box('kit',a.id,r.kit.includes(a.id),`<span><b>${esc(a.name)}</b> <span class="sub mono">${esc(a.serial)}</span><br><span class="sub">${esc(ASSET_TYPES[a.type].insp)} due ${fmt(a.next)}</span></span><span class="chip ${ASTATUS[a.status].c}">${ASTATUS[a.status].l}</span>`)).join('')||'<div class="empty">Add kit first.</div>'}</div>
+    <div class="actions" style="margin-top:16px"><button class="btn primary" data-act="saveJob" data-arg="${esc(id||'')}">Save job</button></div>
+  </div>`);
+}
+function drawerRams(id){
+  const r=ramsById(id); if(!r) return;
+  const c=client(r.client); const revs=revsOf(r.ref); const isLatest=revs[0].id===r.id;
+  const editable=isLatest&&(r.status==='Draft'||r.status==='In review');
+  openDrawer(`<header><div class="id">${esc(r.ref)} · Rev ${r.rev}</div><h3>${esc(r.site)}</h3><span class="chip ${RSTATUS[r.status]}">${esc(r.status)}</span> ${!RAMSONLY&&r.status!=='Closed'&&isLatest?vChip(r):''}</header>
+  <div class="body">
+    <dl class="kv"><dt>Client</dt><dd><span class="dot" style="background:${esc(c?.colour)}"></span>${esc(c?.name)}</dd><dt>Address</dt><dd>${esc(r.address)||'—'}</dd><dt>Dates</dt><dd>${fmt(r.start)} to ${fmt(jobEnd(r))} (${r.days} day${r.days>1?'s':''})</dd><dt>Principal contractor</dt><dd>${esc(r.pc)||'—'}</dd><dt>Crew</dt><dd>${r.crew.length} assigned</dd><dt>Kit</dt><dd>${r.kit.length} items</dd><dt>Prepared by</dt><dd>${esc(r.preparedBy)}</dd><dt>Approved</dt><dd>${r.approvedOn?esc(r.approver)+', '+fmt(r.approvedOn):'—'}</dd></dl>
+    <div class="actions">
+      <button class="btn primary" data-act="openDoc" data-arg="${r.id}">View document</button>
+      ${!RAMSONLY&&isLatest&&r.status!=='Closed'?`<button class="btn" data-act="goReady" data-arg="${r.id}">Readiness check</button>`:''}
+      ${editable?`<button class="btn" data-act="editRams" data-arg="${r.id}">Edit</button>`:''}
+      ${isLatest&&(r.status==='Approved'||r.status==='Closed')?`<button class="btn" data-act="newRev" data-arg="${r.id}">New revision</button>`:''}
+      <button class="btn" data-act="dupRams" data-arg="${r.id}">Copy as new job</button>
+      ${isLatest&&r.status==='Approved'?`<button class="btn" data-act="closeRams" data-arg="${r.id}">Close job</button>`:''}
+      ${editable?`<button class="btn danger" data-act="delRams" data-arg="${r.id}">Delete ${r.rev>1?'revision':'draft'}</button>`:''}
+    </div>
+    <div class="sub-h">Revision history</div>
+    <ul class="hist">${revs.map(x=>`<li><time>${x.updated?fmtT(x.updated):''}</time><b>Rev ${x.rev}</b> · <span class="chip ${RSTATUS[x.status]}">${esc(x.status)}</span><br>${esc(x.note||'—')} ${x.id!==r.id?`<button class="btn ghost sm" data-act="openDoc" data-arg="${x.id}">View</button>`:''}</li>`).join('')}</ul>
+  </div>`);
+}
+
+/* ---------- Wizard ---------- */
+const STEPS=['Job details',RAMSONLY?'Work activities':'Work & team','Site & risks','Review & approve'];
+function newDraft(){
+  const cid=ui.ws!=='all'?ui.ws:''; const c=client(cid);
+  return {ref:'', rev:1, client:cid, site:'', address:'', start:addDays(TODAY,7), days:5, pc:'', contact:c?.contact||'', contactPhone:c?.phone||'', scope:'', preparedBy:S.settings.preparer,
+    tasks:[], conds:[], crew:[], kit:[], risks:[], ppeExtra:'', firstAider:'', hospital:c?.hospital||'', assembly:c?.assembly||'', method:'', methodEdited:false, status:'Draft', approver:'', approvedOn:'', note:'First issue', signoff:{}};
+}
+function startWizard(d, editingId, label){ ui.wiz={d, step:0, editingId:editingId||null, label:label||'New RAMS'}; ui.view='wizard'; render(); }
+VIEWS.new=()=>{ startWizard(newDraft()); return VIEWS.wizard(); };
+function stepOk(i){
+  const d=ui.wiz.d;
+  if(i>=1&&(!d.client||!d.site.trim()||!d.start)) return 'Pick a client and enter the site and start date.';
+  if(i>=2&&!d.tasks.length) return 'Choose at least one work activity.';
+  return '';
+}
+VIEWS.wizard=()=>{
+  if(!ui.wiz){ ui.wiz={d:newDraft(),step:0,editingId:null,label:'New RAMS'}; }
+  const w=ui.wiz, d=w.d;
+  const ref=d.ref?`${d.ref} Rev ${d.rev}`:'Ref assigned on save';
+  return head(esc(w.label), `<span class="mono">${esc(ref)}</span> · Generated from the hazard library. A competent person must review and tailor it to the site before issue.`,
+    `<button class="btn" data-act="saveWiz" data-arg="stay">Save draft</button>`)+`
+  <div class="steps">${STEPS.map((s,i)=>`<button class="${i===w.step?'on':i<w.step?'done':''}" data-act="step" data-arg="${i}"><span class="n">${i<w.step?'✓':i+1}</span><b>${s}</b></button>`).join('')}</div>
+  ${[wStep1,wStep2,wStep3,wStep4][w.step](d)}
+  <div class="w-nav"><button class="btn" data-act="step" data-arg="${w.step-1}" ${w.step===0?'disabled':''}>Back</button>
+  ${w.step<3?`<button class="btn primary" data-act="step" data-arg="${w.step+1}">Next: ${STEPS[w.step+1]}</button>`:`<button class="btn primary" data-act="saveWiz">Save RAMS</button>`}</div>`;
+};
+const fld=(label,html,cls='',req=false)=>`<label class="f ${cls}"><span>${label}${req?' <em>*</em>':''}</span>${html}</label>`;
+const inp=(k,v,type='text',extra='')=>`<input type="${type}" data-bind="${k}" value="${esc(v)}" ${extra}>`;
+function wStep1(d){
+  return `<div class="panel"><h2>Job details</h2><div class="fields">
+    ${fld('Client',`<select data-bind="client">${opt('','Choose a client…',!d.client)}${S.clients.map(c=>opt(c.id,c.name,d.client===c.id)).join('')}</select>`,'',true)}
+    ${fld('Site / job name',inp('site',d.site,'text','placeholder="e.g. Re-roof, 14 Mill Lane"'),'',true)}
+    ${fld('Site address',inp('address',d.address))}
+    ${fld('Principal contractor',inp('pc',d.pc))}
+    ${fld('Start date',inp('start',d.start,'date'),'',true)}
+    ${fld('Duration (working days)',inp('days',d.days,'number','min="1" max="365"'))}
+    ${fld('Site contact',inp('contact',d.contact))}
+    ${fld('Contact phone',inp('contactPhone',d.contactPhone,'tel'))}
+    ${fld('Prepared by',inp('preparedBy',d.preparedBy))}
+    ${fld('Scope of works',`<textarea data-bind="scope" rows="4" placeholder="What will be done, where, and how">${esc(d.scope)}</textarea>`,'full')}
+  </div></div>`;
+}
+function reqPanel(d){
+  const people=d.crew.map(person).filter(Boolean), end=jobEnd(d);
+  const items=d.kit.map(asset).filter(Boolean);
+  return `<div class="panel"><h2>What this job needs</h2>
+    <div class="sub-h" style="margin-top:0">Competence</div>
+    ${reqsFor(d).map(q=>{ const e=evalReq(q,people,d.start,end); return `<div class="req"><span class="mk ${e.lvl}">${e.lvl==='pass'?'✓':e.lvl==='warn'?'!':'✕'}</span><div>${esc(q.why)}<small>${e.msg}</small></div></div>`; }).join('')}
+    <div class="sub-h">Plant & equipment</div>
+    ${kitFor(d).map(t=>{ const has=items.filter(a=>a.type===t); const iss=has.map(a=>assetIssue(a,{...d,ref:d.ref||'__new'})); const lvl=!has.length?'fail':iss.some(x=>x.lvl==='fail')?'fail':iss.some(x=>x.lvl==='warn')?'warn':'pass'; return `<div class="req"><span class="mk ${lvl}">${lvl==='pass'?'✓':lvl==='warn'?'!':'✕'}</span><div>${esc(ASSET_TYPES[t].l)}<small>${has.length?has.map(a=>esc(a.serial)).join(', ')+(lvl!=='pass'?' · '+iss.filter(x=>x.lvl!=='pass').map(x=>x.msg).join('; '):''):'None allocated'}</small></div></div>`; }).join('')}
+  </div>`;
+}
+function needsPanel(d){
+  return `<div class="panel"><h2>What this job needs <small>goes on the RAMS</small></h2>
+    <div class="sub-h" style="margin-top:0">Competence</div>
+    ${reqsFor(d).map(q=>`<div class="req"><span class="mk info">i</span><div>${esc(q.why)}<small>${q.who==='all'?'Everyone on site':'At least one person'}: ${q.c.map(c=>esc(CERTS[c].l)).join(' or ')}</small></div></div>`).join('')}
+    <div class="sub-h">Plant & equipment</div>
+    ${kitFor(d).map(t=>`<div class="req"><span class="mk info">i</span><div>${esc(ASSET_TYPES[t].l)}<small>${esc(ASSET_TYPES[t].insp)} in date for the whole job</small></div></div>`).join('')}
+  </div>`;
+}
+function taskOpts(d){
+  return `<div class="panel"><h2>Work activities <small>${d.tasks.length} selected</small></h2><div class="opts">
+      ${Object.entries(TASKS).map(([k,t])=>{ const on=d.tasks.includes(k); const needs=[...(t.comp||[]).map(q=>q.c.map(c=>CERTS[c].s).join('/')), ...(t.kit||[]).map(x=>ASSET_TYPES[x].l)]; return `<label class="opt ${on?'on':''}"><input type="checkbox" data-tog="tasks" value="${k}" ${on?'checked':''}><span><b>${esc(t.l)}</b><small>${needs.length?'Needs: '+esc(needs.join(' · ')):(t.hz.length)+' hazard'+(t.hz.length>1?'s':'')}</small></span></label>`; }).join('')}
+    </div></div>`;
+}
+function wStep2(d){
+  if(RAMSONLY) return `<div class="w-grid"><div class="stack">${taskOpts(d)}</div>${needsPanel(d)}</div>`;
+  const crew=S.crew.filter(p=>ui.crewAll||p.client===d.client);
+  const kit=S.assets.filter(a=>a.client===d.client);
+  return `<div class="w-grid"><div class="stack">
+    <div class="panel"><h2>Work activities <small>${d.tasks.length} selected</small></h2><div class="opts">
+      ${Object.entries(TASKS).map(([k,t])=>{ const on=d.tasks.includes(k); const needs=[...(t.comp||[]).map(q=>q.c.map(c=>CERTS[c].s).join('/')), ...(t.kit||[]).map(x=>ASSET_TYPES[x].l)]; return `<label class="opt ${on?'on':''}"><input type="checkbox" data-tog="tasks" value="${k}" ${on?'checked':''}><span><b>${esc(t.l)}</b><small>${needs.length?'Needs: '+esc(needs.join(' · ')):(t.hz.length)+' hazard'+(t.hz.length>1?'s':'')}</small></span></label>`; }).join('')}
+    </div></div>
+    <div class="panel"><h2>Crew <small><label style="display:inline-flex;gap:6px;align-items:center;font-weight:500"><input type="checkbox" data-act="crewAll" ${ui.crewAll?'checked':''}> show all clients</label></small></h2>
+      ${crew.length?`<div class="pick">${crew.map(p=>`<label><input type="checkbox" data-tog="crew" value="${p.id}" ${d.crew.includes(p.id)?'checked':''}><span><b>${esc(p.name)}</b> <span class="sub">${esc(p.role)}${ui.crewAll?' · '+esc(client(p.client)?.name):''}</span><br>${Object.keys(p.certs).map(c=>certTag({c,e:p.certs[c]})).join('')}</span><span></span></label>`).join('')}</div>`:`<div class="empty">${d.client?'No crew for this client yet. Add them under Crew & competence.':'Choose a client in step 1.'}</div>`}
+    </div>
+    <div class="panel"><h2>Kit & vehicles</h2>
+      ${kit.length?`<div class="pick">${kit.map(a=>{ const dd=diff(TODAY,a.next); return `<label><input type="checkbox" data-tog="kit" value="${a.id}" ${d.kit.includes(a.id)?'checked':''}><span><b>${esc(a.name)}</b> <span class="sub mono">${esc(a.serial)}</span><br><span class="sub">${esc(ASSET_TYPES[a.type].l)} · ${esc(ASSET_TYPES[a.type].insp)} ${dd<0?'overdue':'due'} ${fmt(a.next)}</span></span><span class="chip ${ASTATUS[a.status].c}">${ASTATUS[a.status].l}</span></label>`; }).join('')}</div>`:`<div class="empty">${d.client?'No kit for this client yet.':'Choose a client in step 1.'}</div>`}
+    </div></div>
+    ${reqPanel(d)}</div>`;
+}
+function wStep3(d){
+  const hs=d.risks.map(r=>band(r.rL,r.rS));
+  const sel=(i,k,v)=>`<select data-risk="${i}:${k}" aria-label="${k}">${[1,2,3,4,5].map(n=>opt(n,n,n===v)).join('')}</select>`;
+  return `<div class="panel" style="margin-bottom:18px"><h2>Site conditions <small>adds the matching hazards</small></h2><div class="opts">
+    ${Object.entries(CONDS).map(([k,c])=>{ const on=d.conds.includes(k); return `<label class="opt ${on?'on':''}"><input type="checkbox" data-tog="conds" value="${k}" ${on?'checked':''}><span><b>${esc(c.l)}</b><small>${c.hz.length} hazard${c.hz.length>1?'s':''}</small></span></label>`; }).join('')}
+  </div></div>
+  <div class="panel"><h2>Risk assessment <small>${d.risks.length} hazards · residual ${hs.filter(x=>x==='H').length} High, ${hs.filter(x=>x==='M').length} Medium, ${hs.filter(x=>x==='L').length} Low</small></h2>
+    <p class="hint" style="margin-top:-6px">Likelihood × Severity, each 1–5. 1–4 Low, 5–10 Medium, 12–25 High. Edit the controls and residual scores to suit the site.</p>
+    <div class="rtable">
+      <div class="rrow head"><span>Hazard / who</span><span>Initial</span><span>Control measures</span><span>Residual (L × S)</span><span></span></div>
+      ${d.risks.map((r,i)=>`<div class="rrow"><div><b>${esc(r.h)}</b><small>${esc(r.who)}</small></div><div>${rb(r.iL,r.iS)}</div><textarea data-risk="${i}:c" aria-label="Controls">${esc(r.c)}</textarea><div class="rres">${sel(i,'rL',r.rL)}×${sel(i,'rS',r.rS)} ${rb(r.rL,r.rS)}</div><div>${r.src==='custom'?`<button class="x" data-act="rmHz" data-arg="${i}" title="Remove" aria-label="Remove hazard">✕</button>`:''}</div></div>`).join('')}
+    </div>
+    <div class="sub-h">Add a site-specific hazard</div>
+    <div class="addhz"><input id="nh-h" placeholder="Hazard"><input id="nh-w" placeholder="Who is at risk"><input id="nh-c" placeholder="Control measures"><button class="btn" data-act="addHz">Add</button></div>
+    ${hs.includes('H')?`<div class="warnbox bad">${hs.filter(x=>x==='H').length} hazard(s) are still High after controls. You won’t be able to approve until they come down.</div>`:''}
+  </div>`;
+}
+function wStep4(d){
+  if(!d.methodEdited) d.method=genMethod(d);
+  const people=d.crew.map(person).filter(Boolean);
+  const fa=people.filter(p=>bestCert(p,['FAW','EFAW'])?.e>=d.start);
+  const hs=d.risks.map(r=>band(r.rL,r.rS));
+  const issues=[];
+  if(hs.includes('H')) issues.push(hs.filter(x=>x==='H').length+' residual High risk(s), so approval is blocked');
+  const end=jobEnd(d);
+  if(!RAMSONLY){
+  reqsFor(d).forEach(q=>{ const e=evalReq(q,people,d.start,end); if(e.lvl==='fail') issues.push(q.why+': '+e.msg.replace(/<[^>]+>/g,'')); });
+  kitFor(d).forEach(t=>{ if(!d.kit.map(asset).some(a=>a&&a.type===t)) issues.push('No '+ASSET_TYPES[t].l.toLowerCase()+' allocated'); });
+  } else if(!String(d.firstAider||'').trim()) issues.push('Name the first aider(s) for the site');
+  return `<div class="w-grid"><div class="stack">
+    <div class="panel"><h2>PPE</h2><div class="ppe">${ppeFor({...d,ppeExtra:''}).map(p=>`<span>${esc(p)}</span>`).join('')}</div>
+      ${fld('Extra PPE for this site (comma or new line)',`<textarea data-bind="ppeExtra" rows="2">${esc(d.ppeExtra)}</textarea>`)}</div>
+    <div class="panel"><h2>Emergency arrangements</h2><div class="fields">
+      ${fld('Nearest A&E',inp('hospital',d.hospital),'full')}
+      ${fld('Assembly point',inp('assembly',d.assembly))}
+      ${RAMSONLY?fld('First aider(s) on site',inp('firstAider',d.firstAider||'','text','placeholder="Name (FAW / EFAW)"')):`<div class="f"><span>First aiders (from crew)</span><div style="padding-top:6px">${fa.length?fa.map(p=>esc(p.name)).join(', '):'<span style="color:var(--red)">None in date</span>'}</div></div>`}
+    </div></div>
+    <div class="panel"><h2>Method statement <small><button class="btn ghost sm" data-act="regenMethod">Rebuild from selections</button></small></h2>
+      <textarea data-bind="method" rows="16" style="width:100%;font-size:12.5px">${esc(d.method)}</textarea>
+      <p class="hint">Lines starting “1.” become headings; lines starting “-” become steps.</p></div>
+  </div>
+  <div class="stack">
+    <div class="panel"><h2>Approval</h2><div class="fields" style="grid-template-columns:1fr">
+      ${fld('Status',`<select data-bind="status">${['Draft','In review','Approved'].map(s=>opt(s,s,d.status===s)).join('')}</select>`)}
+      ${fld('Approved by (competent person)',inp('approver',d.approver,'text','placeholder="Name, qualification"'))}
+      ${fld('Revision note',inp('note',d.note))}
+    </div>
+    ${issues.length?`<div class="warnbox ${hs.includes('H')?'bad':''}"><b>Before this job can start</b><ul>${issues.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:`<div class="warnbox" style="border-color:var(--green);background:var(--green-soft)">No blocking issues in the RAMS itself.${RAMSONLY?'':' Run the readiness check after saving.'}</div>`}
+    </div>
+    <div class="panel"><h2>Summary</h2><dl class="kv" style="grid-template-columns:110px 1fr">
+      <dt>Client</dt><dd>${esc(client(d.client)?.name)||'—'}</dd><dt>Site</dt><dd>${esc(d.site)||'—'}</dd><dt>Dates</dt><dd>${fmt(d.start)} to ${fmt(end)}</dd><dt>Activities</dt><dd>${d.tasks.map(k=>esc(TASKS[k].l)).join(', ')||'—'}</dd><dt>Hazards</dt><dd>${d.risks.length}</dd>${RAMSONLY?'':`<dt>Crew</dt><dd>${people.length}</dd><dt>Kit</dt><dd>${d.kit.length} items</dd>`}</dl></div>
+  </div></div>`;
+}
+function saveWizard(stay){
+  const w=ui.wiz, d=w.d;
+  const bad=stepOk(1); if(bad){ w.step=0; render(); return toast(bad); }
+  syncRisks(d);
+  if(d.status==='Approved'){
+    if(!d.tasks.length) return info('Can’t approve yet','Choose at least one work activity first.');
+    if(d.risks.some(r=>band(r.rL,r.rS)==='H')) return info('Can’t approve with High residual risk','At least one hazard is still High after controls. Add controls in step 3 until the residual risk is Medium or Low, then approve.');
+    if(!d.approver.trim()) return info('Who is approving?','Enter the name of the competent person approving this RAMS.');
+    d.approvedOn=TODAY;
+  } else { d.approvedOn=''; }
+  if(!d.methodEdited) d.method=genMethod(d);
+  const now=new Date().toISOString(); let rec;
+  if(w.editingId){ const i=S.rams.findIndex(x=>x.id===w.editingId); rec={...S.rams[i], ...JSON.parse(JSON.stringify(d)), updated:now}; S.rams[i]=rec; }
+  else { rec={...JSON.parse(JSON.stringify(d)), id:uid('r'), ref:d.ref||nextRef(), created:now, updated:now}; S.rams.push(rec); w.editingId=rec.id; d.ref=rec.ref; }
+  if(rec.status==='Approved') S.rams.forEach(x=>{ if(x.ref===rec.ref&&x.id!==rec.id&&x.status==='Approved') x.status='Superseded'; });
+  log(`${rec.ref} Rev ${rec.rev} saved as ${rec.status}${rec.status==='Approved'?' by '+rec.approver:''} (${client(rec.client)?.name})`);
+  save();
+  if(stay){ toast(rec.ref+' saved'); render(true); return; }
+  ui.wiz=null; ui.docId=rec.id; ui.view='doc'; render(); toast(rec.ref+' Rev '+rec.rev+' saved');
+}
+
+/* ---------- Document ---------- */
+VIEWS.doc=()=>{
+  const r=ramsById(ui.docId); if(!r){ ui.view='rams'; return VIEWS.rams(); }
+  const c=client(r.client)||{}; const revs=revsOf(r.ref); const isLatest=revs[0].id===r.id;
+  const people=r.crew.map(person).filter(Boolean), items=r.kit.map(asset).filter(Boolean);
+  const reqC=uniq(reqsFor(r).flatMap(q=>q.c));
+  const fa=people.filter(p=>bestCert(p,['FAW','EFAW']));
+  const ms=String(r.method||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>/^\d+\./.test(l)?`<li class="h">${esc(l)}</li>`:`<li class="b">${esc(l.replace(/^[-•]\s*/,''))}</li>`).join('');
+  const editable=isLatest&&(r.status==='Draft'||r.status==='In review');
+  return `<div class="top no-print"><div><h1>${esc(r.ref)} <span class="muted" style="font-weight:600">Rev ${r.rev}</span></h1><p>${esc(r.site)} · ${esc(c.name)}</p></div><div class="right"><span class="date">${fmt(TODAY)}</span></div></div>
+  <div class="doc-bar">
+    <button class="btn" data-act="go" data-arg="rams">← Register</button>
+    <button class="btn primary" data-act="print">Print / save PDF</button>
+    ${editable?`<button class="btn" data-act="editRams" data-arg="${r.id}">Edit</button>`:''}
+    ${isLatest&&(r.status==='Approved'||r.status==='Closed')?`<button class="btn" data-act="newRev" data-arg="${r.id}">New revision</button>`:''}
+    ${!RAMSONLY&&isLatest&&r.status!=='Closed'?`<button class="btn" data-act="goReady" data-arg="${r.id}">Readiness check</button>`:''}
+    <button class="btn" data-act="copyDoc" data-arg="${r.id}">Copy as text</button>
+    ${!isLatest?`<span class="chip n">Older revision. Rev ${revs[0].rev} is current.</span>`:''}
+  </div>
+  <article class="doc" style="--cc:${esc(c.colour||'#1B2230')}">
+    ${r.status!=='Approved'&&r.status!=='Closed'?`<div class="wm">${r.status==='Superseded'?'SUPERSEDED':'DRAFT'}</div>`:''}
+    <div class="lh"><div class="mark">${esc(c.initials||'?')}</div><div class="co">${esc(c.name)}<small>${esc(c.address)}${c.phone?' · '+esc(c.phone):''}${c.email?' · '+esc(c.email):''}</small></div>
+      <div class="ttl"><b>Risk assessment &amp; method statement</b><span class="mono">${esc(r.ref)} · Rev ${r.rev}</span><br><span class="stamp ${esc(r.status.split(' ')[0])}">${esc(r.status)}</span></div></div>
+    <h4>1. Job details</h4>
+    <div class="facts2"><div><span>Site / job</span>${esc(r.site)}</div><div><span>Address</span>${esc(r.address)||'—'}</div><div><span>Principal contractor</span>${esc(r.pc)||'—'}</div><div><span>Site contact</span>${esc(r.contact)||'—'}${r.contactPhone?' · '+esc(r.contactPhone):''}</div><div><span>Dates</span>${fmt(r.start)} to ${fmt(jobEnd(r))} (${r.days} day${r.days>1?'s':''})</div><div><span>Prepared by</span>${esc(r.preparedBy)} for ${esc(S.settings.licensee)}</div><div><span>Approved by</span>${r.approvedOn?esc(r.approver)+' on '+fmt(r.approvedOn):'Not yet approved'}</div><div><span>Activities</span>${r.tasks.map(k=>esc(TASKS[k]?.l)).join(', ')}</div></div>
+    <h4>2. Scope of works</h4><p style="margin:0">${esc(r.scope)||'—'}</p>
+    <h4>3. Risk assessment</h4>
+    <table><thead><tr><th style="width:24px">#</th><th>Hazard</th><th>Who is at risk</th><th>Initial</th><th>Control measures</th><th>Residual</th></tr></thead><tbody>${r.risks.map((x,i)=>`<tr><td class="mono">${i+1}</td><td><b>${esc(x.h)}</b></td><td>${esc(x.who)}</td><td>${rb(x.iL,x.iS)}</td><td>${esc(x.c)}</td><td>${rb(x.rL,x.rS)}</td></tr>`).join('')}</tbody></table>
+    <div class="matrix"><span>Likelihood × Severity (1–5 each)</span><span class="rb L">1–4 Low</span><span class="rb M">5–10 Medium</span><span class="rb H">12–25 High</span></div>
+    <h4>4. Method statement</h4><ol class="ms">${ms}</ol>
+    <h4>5. Personal protective equipment</h4><p style="margin:0">${ppeFor(r).map(esc).join(' · ')}</p>
+    ${RAMSONLY?`<h4>6. Competence required</h4>
+    <table><thead><tr><th>Requirement</th><th>Who</th><th>Accepted cards / training</th></tr></thead><tbody>${reqsFor(r).map(q=>`<tr><td><b>${esc(q.why)}</b></td><td>${q.who==='all'?'Everyone on site':'At least one person on site'}</td><td>${q.c.map(c=>esc(CERTS[c].l)).join(' or ')}</td></tr>`).join('')}</tbody></table>
+    <h4>7. Plant, equipment & inspections</h4>
+    <table><thead><tr><th>Item</th><th>Inspection that must be in date for the whole job</th></tr></thead><tbody>${kitFor(r).map(t=>`<tr><td>${esc(ASSET_TYPES[t].l)}</td><td>${esc(ASSET_TYPES[t].insp)} (at least every ${ASSET_TYPES[t].every} days), plus pre-use checks</td></tr>`).join('')}</tbody></table>`:`<h4>6. Crew & competence</h4>
+    ${people.length?`<table><thead><tr><th>Name</th><th>Role</th><th>Relevant cards (expiry)</th></tr></thead><tbody>${people.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.role)}</td><td>${reqC.filter(c=>p.certs[c]).map(c=>esc(CERTS[c].s)+' '+fmt(p.certs[c])).join(' · ')||'—'}</td></tr>`).join('')}</tbody></table>`:'<p style="margin:0">To be confirmed.</p>'}
+    <h4>7. Plant, equipment & vehicles</h4>
+    ${items.length?`<table><thead><tr><th>ID</th><th>Item</th><th>Inspection</th><th>Valid to</th></tr></thead><tbody>${items.map(a=>`<tr><td class="mono">${esc(a.serial)}</td><td>${esc(a.name)}</td><td>${esc(ASSET_TYPES[a.type].insp)}</td><td class="mono">${fmt(a.next)}</td></tr>`).join('')}</tbody></table>`:'<p style="margin:0">To be confirmed.</p>'}`}
+    <h4>8. Emergency arrangements</h4>
+    <div class="facts2"><div><span>Emergency services</span>999 (give the site address above)</div><div><span>Nearest A&E</span>${esc(r.hospital)||'—'}</div><div><span>First aider(s)</span>${fa.map(p=>esc(p.name)).join(', ')||esc(r.firstAider)||'—'}</div><div><span>Assembly point</span>${esc(r.assembly)||'—'}</div></div>
+    <h4>9. Briefing record</h4>
+    <p style="margin:0 0 8px">I have been briefed on this RAMS, understand it and will work to it.</p>
+    <table><thead><tr><th>Name</th><th>Signature</th><th>Date / time</th></tr></thead><tbody>${(people.length?people:Array(RAMSONLY?8:3).fill({})).map(p=>`<tr><td>${esc(p.name||'')}&nbsp;</td><td>${p.id&&r.signoff?.[p.id]?'Signed electronically':''}</td><td class="mono">${p.id&&r.signoff?.[p.id]?fmtT(r.signoff[p.id]):''}</td></tr>`).join('')}</tbody></table>
+    <h4>10. Revision history</h4>
+    <table><thead><tr><th>Rev</th><th>Status</th><th>Note</th><th>Date</th></tr></thead><tbody>${revs.slice().reverse().map(x=>`<tr><td class="mono">${x.rev}</td><td>${esc(x.status)}</td><td>${esc(x.note)}</td><td class="mono">${x.approvedOn?fmt(x.approvedOn):x.updated?fmt(x.updated.slice(0,10)):'—'}</td></tr>`).join('')}</tbody></table>
+    <div class="foot"><span>Prepared by ${esc(S.settings.licensee)} for ${esc(c.name)}. Built from a template hazard library and reviewed for this site by the competent person named above.</span><span>${esc(PRODUCT.name)} · ${esc(r.ref)} Rev ${r.rev}</span></div>
+  </article>`;
+};
+
+/* ---------- Readiness ---------- */
+VIEWS.ready=()=>{
+  const R=latest().filter(r=>inWs(r.client)&&!['Closed','Superseded'].includes(r.status)).sort((a,b)=>a.start.localeCompare(b.start));
+  if(!R.length) return head('Readiness check')+'<div class="panel empty">No open RAMS in this workspace.</div>';
+  let r=R.find(x=>x.id===ui.readySel); if(!r){ r=R.find(x=>jobEnd(x)>=TODAY)||R[0]; ui.readySel=r.id; }
+  const a=assess(r); const V=VERD[a.verdict]; const c=client(r.client);
+  const reqC=uniq(reqsFor(r).flatMap(q=>q.c));
+  const booked=r.kit.map(asset).filter(x=>x&&x.status==='D'&&x.job===r.ref).length;
+  return head('Readiness check','Go / no-go for a job: is the RAMS approved, does the crew hold the right cards for the whole job, and is every item of kit available and in date?')+`
+  <div class="dep-head"><div>
+    <select data-on="readySel" aria-label="Choose job">${R.map(x=>opt(x.id, x.ref+' · '+x.site+' · '+fmt(x.start), x.id===r.id)).join('')}</select>
+    <div class="facts"><div><span>${READYONLY?'Company':'Client'}</span><b><span class="dot" style="background:${esc(c?.colour)}"></span>${esc(c?.name)}</b></div><div><span>Dates</span><b>${fmt(a.start)} to ${fmt(a.end)}</b></div><div><span>${READYONLY?'RAMS':'Status'}</span><b>${READYONLY?(esc(r.ramsRef)||'—')+' · '+esc(stLabel(r.status)):esc(r.status)+' · Rev '+r.rev}</b></div><div><span>Crew / kit</span><b>${a.people.length} / ${a.kitRows.length}</b></div></div>
+    <div class="actions" style="margin:14px 0 0">${READYONLY?`<button class="btn" data-act="editJob" data-arg="${r.id}">Edit job</button>`:`<button class="btn" data-act="openDoc" data-arg="${r.id}">View RAMS</button>`}<button class="btn" data-act="copyReady" data-arg="${r.id}">Copy summary</button>
+    ${booked?`<button class="btn" data-act="returnKit" data-arg="${r.id}">Return kit (${booked})</button>`:`<button class="btn" data-act="bookKit" data-arg="${r.id}" ${a.verdict==='no'?'disabled title="Clear the red items first"':''}>Book kit out</button>`}
+    ${!READYONLY&&r.status!=='Approved'?`<button class="btn" data-act="editRams" data-arg="${r.id}">Edit RAMS</button>`:''}</div>
+  </div><div class="verdict ${a.verdict==='ok'?'ok':a.verdict==='caveat'?'caveat':'no'}"><div class="big">${V.t}</div><small>${a.checks.filter(x=>x.lvl==='fail').length} red · ${a.checks.filter(x=>x.lvl==='warn').length} amber · ${a.checks.filter(x=>x.lvl==='pass').length} passed</small></div></div>
+  <div class="checks">${a.checks.sort((x,y)=>({fail:0,warn:1,info:2,pass:3}[x.lvl]-{fail:0,warn:1,info:2,pass:3}[y.lvl])).map(x=>`<div class="check"><span class="mk ${x.lvl}">${x.lvl==='pass'?'✓':x.lvl==='fail'?'✕':x.lvl==='warn'?'!':'i'}</span><div><span class="grp">${esc(x.grp)}</span><b>${x.t}</b><p>${x.p}</p></div></div>`).join('')}</div>
+  <div class="grid g-2e">
+    <div class="panel"><h2>Crew competence <small>cards needed for this job</small></h2>
+      ${a.people.length?`<div class="tablewrap" style="border:0"><table><thead><tr><th>Name</th>${reqC.map(x=>`<th>${esc(CERTS[x].s)}</th>`).join('')}</tr></thead><tbody>${a.people.map(p=>`<tr class="click" data-act="openPerson" data-arg="${p.id}"><td><b>${esc(p.name)}</b><br><span class="hint">${esc(p.role)}</span></td>${reqC.map(x=>{ const e=p.certs[x]; if(!e) return '<td class="muted">—</td>'; const cls=e<a.start?'bad':e<a.end?'warn':''; return `<td class="mono ${cls}">${fmtS(e)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`:'<div class="empty">No crew assigned.</div>'}
+    </div>
+    <div class="panel"><h2>Kit & vehicles <small>${a.kitRows.length} allocated</small></h2>
+      ${a.kitRows.length?a.kitRows.map(x=>`<div class="row click" data-act="openAsset" data-arg="${x.a.id}"><div><div class="nm"><span class="mono">${esc(x.a.serial)}</span> ${esc(x.a.name)}</div><div class="meta" style="color:${x.lvl==='fail'?'var(--red)':x.lvl==='warn'?'var(--amber)':'var(--ink2)'}">${x.msg}</div></div><span class="chip ${ASTATUS[x.a.status].c}">${ASTATUS[x.a.status].l}</span></div>`).join(''):'<div class="empty">No kit allocated.</div>'}
+    </div>
+  </div>
+  <div class="panel" style="margin-top:18px"><h2>Briefing sign-off <small>${a.people.filter(p=>r.signoff?.[p.id]).length} of ${a.people.length} signed</small></h2>
+    ${a.people.length?a.people.map(p=>`<div class="sign"><div><b>${esc(p.name)}</b> <span class="hint">${esc(p.role)}</span>${r.signoff?.[p.id]?`<br><span class="hint">Signed ${fmtT(r.signoff[p.id])}</span>`:''}</div>${r.signoff?.[p.id]?`<button class="btn sm" data-act="unsign" data-arg="${p.id}">Undo</button>`:`<button class="btn sm primary" data-act="sign" data-arg="${p.id}" ${r.status!=='Approved'?'disabled title="Approve the RAMS first"':''}>Mark briefed & signed</button>`}</div>`).join(''):'<div class="empty">Assign crew in the RAMS first.</div>'}
+    <p class="hint">On site, each operative signs on the supervisor’s phone or tablet. A new revision needs a fresh briefing.</p>
+  </div>`;
+};
+
+/* ---------- Clients ---------- */
+VIEWS.clients=()=>head('Clients','Each client is a workspace with its own letterhead, contacts and emergency details'+(RAMSONLY?'.':', plus their crew and kit.'),`<button class="btn primary" data-act="editClient" data-arg="">Add client</button>`)+
+  `<div class="cards">${S.clients.map(c=>{ const L=latest().filter(r=>r.client===c.id); const live=L.filter(r=>r.status==='Approved'&&jobEnd(r)>=TODAY).length; return `<button class="ccard" style="--cc:${esc(c.colour)}" data-act="editClient" data-arg="${c.id}"><div class="hd"><div class="mark">${esc(c.initials)}</div><div><b>${esc(c.name)}</b><br><span class="hint">${esc(c.address)}</span></div></div><div class="meta">${esc(c.contact)}${c.phone?' · '+esc(c.phone):''}</div><div class="stats"><div><b>${live}</b><span>live RAMS</span></div>${RAMSONLY?`<div><b>${L.length}</b><span>RAMS in total</span></div><div><b>${L.filter(r=>r.status==='Draft'||r.status==='In review').length}</b><span>awaiting approval</span></div>`:`<div><b>${S.crew.filter(p=>p.client===c.id).length}</b><span>crew</span></div><div><b>${S.assets.filter(a=>a.client===c.id).length}</b><span>kit items</span></div>`}</div></button>`; }).join('')}</div>`;
+function drawerClient(id){
+  const c=id?client(id):{id:'',name:'',coNo:'',colour:'#1F4E8C',initials:'',address:'',contact:'',phone:'',email:'',hospital:'',assembly:'',ppe:[]};
+  const linked=id&&(S.rams.some(r=>r.client===id)||S.crew.some(p=>p.client===id)||S.assets.some(a=>a.client===id));
+  openDrawer(`<header><div class="id">${id?'Client workspace':'New client'}</div><h3>${esc(c.name)||'Add client'}</h3></header><div class="body" id="cform">
+    <div class="fields" style="grid-template-columns:1fr">
+    ${fld('Company name',`<input name="name" value="${esc(c.name)}">`,'',true)}
+    ${fld('Company number',`<input name="coNo" value="${esc(c.coNo)}">`)}
+    <div class="fields">${fld('Letterhead colour',`<input type="color" name="colour" value="${esc(c.colour)}">`)}${fld('Initials',`<input name="initials" maxlength="3" value="${esc(c.initials)}">`)}</div>
+    ${fld('Address',`<input name="address" value="${esc(c.address)}">`)}
+    <div class="fields">${fld('Main contact',`<input name="contact" value="${esc(c.contact)}">`)}${fld('Phone',`<input name="phone" value="${esc(c.phone)}">`)}</div>
+    ${fld('Email',`<input name="email" type="email" value="${esc(c.email)}">`)}
+    ${fld('Default nearest A&E',`<input name="hospital" value="${esc(c.hospital)}">`)}
+    ${fld('Default assembly point',`<input name="assembly" value="${esc(c.assembly)}">`)}
+    ${fld('Client PPE rules (comma separated)',`<input name="ppe" value="${esc((c.ppe||[]).join(', '))}">`)}
+    </div>
+    <div class="actions" style="margin-top:16px"><button class="btn primary" data-act="saveClient" data-arg="${esc(id||'')}">Save client</button>
+    ${id?`<button class="btn" data-act="wsSet" data-arg="${id}">Open workspace</button><button class="btn danger" data-act="delClient" data-arg="${id}" ${linked?'disabled title="Has RAMS, crew or kit"':''}>Delete</button>`:''}</div>
+    ${linked?'<p class="hint">A client with RAMS, crew or kit can’t be deleted.</p>':''}
+  </div>`);
+}
+
+/* ---------- Kit ---------- */
+VIEWS.kit=()=>head('Kit & vehicles','Access equipment, plant, tools and vans with their statutory inspections. Anything overdue or quarantined blocks the jobs it’s allocated to.',
+  `<button class="btn" data-act="exportKit">Export CSV</button><button class="btn primary" data-act="addAsset">Add item</button>`)+`
+  <div class="toolbar"><input type="search" placeholder="Search ID, item…" value="${esc(ui.f.q)}" data-on="q" aria-label="Search">
+  <select data-on="type" aria-label="Type">${opt('','All types',!ui.f.type)}${Object.entries(ASSET_TYPES).map(([k,t])=>opt(k,t.l,ui.f.type===k)).join('')}</select>
+  <select data-on="status" aria-label="Status">${opt('','All statuses',!ui.f.status)}${opt('due','Due in 30 days / overdue',ui.f.status==='due')}${Object.entries(ASTATUS).map(([k,s])=>opt(k,s.l,ui.f.status===k)).join('')}</select></div>
+  <div class="tablewrap" id="tbl">${kitTable()}</div>`;
+function kitTable(){
+  const q=ui.f.q.toLowerCase();
+  const A=S.assets.filter(a=>inWs(a.client)&&(!ui.f.type||a.type===ui.f.type)&&(!ui.f.status||(ui.f.status==='due'?diff(TODAY,a.next)<=30:a.status===ui.f.status))&&(!q||(a.serial+' '+a.name+' '+ASSET_TYPES[a.type].l).toLowerCase().includes(q))).sort((a,b)=>a.next.localeCompare(b.next));
+  if(!A.length) return '<div class="empty">No kit matches.</div>';
+  return `<table><thead><tr><th>ID</th><th>Item</th><th>Type</th><th>Client</th><th>Status</th><th>Inspection</th><th>Next due</th><th>Allocated to</th></tr></thead><tbody>${A.map(a=>{ const d=diff(TODAY,a.next); const jobs=latest().filter(r=>!['Closed','Superseded'].includes(r.status)&&r.kit.includes(a.id)&&jobEnd(r)>=TODAY).map(r=>r.ref); return `<tr class="click" data-act="openAsset" data-arg="${a.id}"><td class="mono">${esc(a.serial)}</td><td>${esc(a.name)}</td><td>${esc(ASSET_TYPES[a.type].l)}</td><td><span class="dot" style="background:${esc(client(a.client)?.colour)}"></span>${esc(client(a.client)?.name)}</td><td><span class="chip ${ASTATUS[a.status].c}">${ASTATUS[a.status].l}</span></td><td>${esc(ASSET_TYPES[a.type].insp)}</td><td class="mono ${d<0?'bad':d<=30?'warn':''}">${fmt(a.next)}${d<0?' · overdue':d<=30?' · '+d+'d':''}</td><td class="mono">${jobs.join(', ')||'—'}</td></tr>`; }).join('')}</tbody></table>`;
+}
+function drawerAsset(id){
+  const a=asset(id); if(!a) return; const T=ASSET_TYPES[a.type]; const d=diff(TODAY,a.next);
+  const jobs=latest().filter(r=>!['Closed','Superseded'].includes(r.status)&&r.kit.includes(a.id));
+  openDrawer(`<header><div class="id">${esc(a.serial)}</div><h3>${esc(a.name)}</h3><span class="chip ${ASTATUS[a.status].c}">${ASTATUS[a.status].l}</span></header><div class="body">
+    <dl class="kv"><dt>Type</dt><dd>${esc(T.l)}</dd><dt>Client</dt><dd>${esc(client(a.client)?.name)}</dd><dt>${esc(T.insp)}</dt><dd>Last ${fmt(a.last)}<br><b style="color:${d<0?'var(--red)':d<=30?'var(--amber)':'inherit'}">Next ${fmt(a.next)}${d<0?' (overdue)':d<=30?' ('+d+' days)':''}</b></dd><dt>Interval</dt><dd>Every ${T.every} days</dd>${a.note?`<dt>Note</dt><dd>${esc(a.note)}</dd>`:''}${a.job?`<dt>Booked out to</dt><dd class="mono">${esc(a.job)}</dd>`:''}<dt>Allocated to</dt><dd>${jobs.map(r=>`<button class="btn ghost sm" data-act="goReady" data-arg="${r.id}">${esc(r.ref)}</button>`).join(' ')||'—'}</dd></dl>
+    <div class="actions">
+      <button class="btn primary" data-act="inspect" data-arg="${a.id}">Record ${esc(T.insp.toLowerCase())}</button>
+      ${a.status==='U'||a.status==='R'?`<button class="btn" data-act="toService" data-arg="${a.id}">Return to service</button>`:`<button class="btn danger" data-act="quarantine" data-arg="${a.id}">Quarantine</button>`}
+      ${a.status==='U'?`<button class="btn" data-act="toRepair" data-arg="${a.id}">Send for repair</button>`:''}
+      <button class="btn danger" data-act="delAsset" data-arg="${a.id}">Delete</button>
+    </div>
+    <div class="sub-h">History</div><ul class="hist">${a.hist.slice().reverse().map(h=>`<li><time>${fmtT(h.t)}</time>${esc(h.msg)}</li>`).join('')||'<li>No history</li>'}</ul>
+  </div>`);
+}
+
+/* ---------- Crew ---------- */
+VIEWS.crew=()=>head('Crew & competence','Cards and training with expiry dates. The readiness check uses these to confirm the crew is competent for the whole job, not just day one.',
+  `<button class="btn" data-act="exportCrew">Export CSV</button><button class="btn primary" data-act="openPerson" data-arg="">Add person</button>`)+`
+  <div class="toolbar"><input type="search" placeholder="Search name, role…" value="${esc(ui.f.q)}" data-on="q" aria-label="Search">
+  <span class="hint"><span class="tag ok">valid</span><span class="tag warn">≤ 60 days</span><span class="tag bad">expired</span></span></div>
+  <div class="tablewrap" id="tbl">${crewTable()}</div>`;
+function crewTable(){
+  const q=ui.f.q.toLowerCase();
+  const C=S.crew.filter(p=>inWs(p.client)&&(!q||(p.name+' '+p.role).toLowerCase().includes(q)));
+  if(!C.length) return '<div class="empty">No crew match.</div>';
+  return `<table><thead><tr><th>Name</th><th>Role</th><th>Client</th>${CREW_COLS.map(c=>`<th>${c.l}</th>`).join('')}</tr></thead><tbody>${C.map(p=>`<tr class="click" data-act="openPerson" data-arg="${p.id}"><td><b>${esc(p.name)}</b></td><td>${esc(p.role)}</td><td><span class="dot" style="background:${esc(client(p.client)?.colour)}"></span>${esc(client(p.client)?.initials)}</td>${CREW_COLS.map(col=>{ const b=bestCert(p,col.c); return `<td>${b?certTag(b):'<span class="muted">—</span>'}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function drawerPerson(id){
+  const p=id?person(id):{id:'',name:'',role:'',client:ui.ws!=='all'?ui.ws:S.clients[0]?.id,certs:{}};
+  if(!p) return;
+  openDrawer(`<header><div class="id">${id?'Crew record':'New person'}</div><h3>${esc(p.name)||'Add person'}</h3></header><div class="body" id="pform">
+    <div class="fields" style="grid-template-columns:1fr">${fld('Name',`<input name="name" value="${esc(p.name)}">`,'',true)}${fld('Role',`<input name="role" value="${esc(p.role)}">`)}${fld('Client',`<select name="client">${S.clients.map(c=>opt(c.id,c.name,p.client===c.id)).join('')}</select>`)}</div>
+    <div class="sub-h">Cards & training (expiry date)</div>
+    <div class="fields">${Object.entries(CERTS).map(([k,c])=>{ const e=p.certs[k]; const d=e?diff(TODAY,e):null; return fld(esc(c.l)+(e?` <span class="tag ${d<0?'bad':d<=60?'warn':'ok'}">${d<0?'expired':d<=60?d+'d':'valid'}</span>`:''),`<input type="date" name="cert_${k}" value="${esc(e||'')}">`); }).join('')}</div>
+    <div class="actions" style="margin-top:16px"><button class="btn primary" data-act="savePerson" data-arg="${esc(id||'')}">Save</button>${id?`<button class="btn danger" data-act="delPerson" data-arg="${id}">Delete</button>`:''}</div>
+  </div>`);
+}
+
+/* ---------- Log & settings ---------- */
+VIEWS.log=()=>head('Activity log','Every save, approval, inspection, quarantine and sign-off, newest first.')+`<div class="panel"><ul class="hist">${S.log.map(l=>`<li><time>${fmtT(l.t)}</time>${esc(l.msg)}</li>`).join('')||'<li>No activity yet</li>'}</ul></div>`;
+VIEWS.settings=()=>head('Settings & licence')+`<div class="grid g-2e">
+  <div class="panel"><h2>${READYONLY?'Your company':'Your consultancy'}</h2><div class="fields" style="grid-template-columns:1fr" id="sform">
+    ${fld(READYONLY?'Company name':'Consultancy name (shown on every RAMS)',`<input name="licensee" value="${esc(S.settings.licensee)}">`)}
+    ${READYONLY?`<input type="hidden" name="preparer" value="${esc(S.settings.preparer)}">`:fld('Default “prepared by”',`<input name="preparer" value="${esc(S.settings.preparer)}">`)}
+  </div><div class="actions" style="margin-top:14px"><button class="btn primary" data-act="saveSettings">Save</button></div></div>
+  <div class="panel"><h2>Licence</h2><dl class="kv"><dt>Licensed to</dt><dd>${esc(S.settings.licensee)}</dd><dt>Licence key</dt><dd class="mono">${esc(CFG.licence)}</dd><dt>Plan</dt><dd>${esc(CFG.plan)}</dd><dt>Status</dt><dd><span class="chip s">${DEMO?'Public demo':'Active (demo)'}</span></dd><dt>Supplier</dt><dd>${esc(CFG.vendor)} · <a href="${CFG.vendorSite}" target="_blank" rel="noopener">emilendres.com</a></dd></dl>
+  <p class="hint">Demo build: online licence checks are switched off and all data stays in this browser.</p></div>
+  <div class="panel"><h2>Your data</h2><p class="hint" style="margin-top:0">Data is saved in this browser. Back it up as a file of text you can paste back later.</p>
+  ${DEMO?'<p class="hint">Backup and restore are switched off in the public demo.</p>':''}<div class="actions" ${DEMO?'hidden':''}><button class="btn" data-act="backup">Back up data</button><button class="btn" data-act="restore">Restore from backup</button><button class="btn danger" data-act="reset">Reset to sample data</button></div></div>
+</div>`;
+
+/* ================= Drawer / modal ================= */
+function openDrawer(html){ const d=$('#drawer'); d.innerHTML='<button class="close" data-act="closeDrawer" aria-label="Close">✕</button>'+html; d.classList.add('open'); d.setAttribute('aria-hidden','false'); $('#scrim').classList.add('open'); setTimeout(()=>d.querySelector('.close').focus(),50); }
+function closeDrawer(){ const d=$('#drawer'); d.classList.remove('open'); d.setAttribute('aria-hidden','true'); $('#scrim').classList.remove('open'); ui.drawer=null; }
+function modal(html){ const m=$('#modal'); m.innerHTML=`<div class="mbox" role="dialog" aria-modal="true">${html}</div>`; m.classList.add('open'); setTimeout(()=>{ const f=m.querySelector('input,textarea,select,.btn.primary,.btn.danger'); f&&f.focus(); },30); }
+function closeModal(){ $('#modal').classList.remove('open'); $('#modal').innerHTML=''; MODAL_OK=null; }
+function info(t,msg){ modal(`<h3>${esc(t)}</h3><p>${esc(msg)}</p><div class="mact"><button class="btn primary" data-act="mclose">OK</button></div>`); }
+function ask(t,msg,okLabel,danger,fn,fieldsHtml=''){ MODAL_OK=fn; modal(`<h3>${esc(t)}</h3>${msg?`<p>${esc(msg)}</p>`:''}${fieldsHtml}<div class="mact"><button class="btn" data-act="mclose">Cancel</button><button class="btn ${danger?'danger':'primary'}" data-act="mok">${esc(okLabel)}</button></div>`); }
+function formVals(root){ const o={}; root.querySelectorAll('[name]').forEach(el=>o[el.name]=el.value); return o; }
+function copyText(text){
+  const done=()=>toast('Copied');
+  try{ if(navigator.clipboard&&window.isSecureContext){ navigator.clipboard.writeText(text).then(done,()=>fallback()); return; } }catch(e){}
+  fallback();
+  function fallback(){ const ta=$('#modal textarea.copy'); if(ta){ ta.focus(); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('Select the text and copy it'); } } }
+}
+function showText(title,text,file){
+  if(!EMBED&&file){ try{ const b=new Blob([text],{type:file.endsWith('.csv')?'text/csv':'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=file; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Saved '+file); return; }catch(e){} }
+  modal(`<h3>${esc(title)}</h3><p>Copy this and paste it into a spreadsheet or a text file.</p><textarea class="copy" readonly>${esc(text)}</textarea><div class="mact"><button class="btn" data-act="mclose">Close</button><button class="btn primary" data-act="copyModal">Copy</button></div>`);
+}
+const csv=rows=>rows.map(r=>r.map(v=>{ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\n');
+
+/* ================= Actions ================= */
+const ACT={
+  go(v){ closeDrawer(); if(v==='new'){ ui.wiz={d:newDraft(),step:0,editingId:null,label:'New RAMS'}; ui.view='wizard'; } else ui.view=v; ui.f={q:'',type:'',status:''}; render(); },
+  closeDrawer, mclose:closeModal,
+  theme(){ setTheme(curTheme()==='dark'?'light':'dark'); renderShell(); },
+  mok(){ const f=MODAL_OK; const vals=formVals($('#modal')); closeModal(); f&&f(vals); },
+  copyModal(){ copyText($('#modal textarea.copy').value); },
+  wsSet(id){ ui.ws=id; closeDrawer(); ui.view='dash'; render(); },
+  openRams(id){ READYONLY?drawerJob(id):drawerRams(id); },
+  editJob(id){ drawerJobEdit(id); },
+  saveJob(id){
+    const v=formVals($('#jform')); const pick=n=>[...document.querySelectorAll('#jform input[name="'+n+'"]:checked')].map(x=>x.value);
+    if(!v.site.trim()) return toast('Enter the site / job name');
+    if(v.status==='Approved'&&!v.approver.trim()) return toast('Enter who approved the RAMS');
+    const data={site:v.site.trim(),address:v.address,start:v.start||TODAY,days:Math.max(1,parseInt(v.days)||1),ramsRef:v.ramsRef.trim(),status:v.status,approver:v.approver.trim(),hospital:v.hospital,tasks:pick('tasks'),crew:pick('crew'),kit:pick('kit')};
+    const now=new Date().toISOString(); let r;
+    if(id){ r=ramsById(id); data.approvedOn=data.status==='Approved'?(r.status==='Approved'&&r.ramsRef===data.ramsRef?r.approvedOn:TODAY):''; if(data.ramsRef!==r.ramsRef){ r.signoff={}; } Object.assign(r,data,{updated:now}); log(r.ref+' updated'); }
+    else { r={id:uid('r'),ref:nextRef('JOB'),rev:1,client:S.clients[0]?.id,conds:[],risks:[],pc:'',contact:'',contactPhone:'',scope:'',preparedBy:'',ppeExtra:'',firstAider:'',assembly:'',method:'',methodEdited:true,note:'',signoff:{},created:now,updated:now,...data,approvedOn:data.status==='Approved'?TODAY:''}; S.rams.push(r); log(r.ref+' added: '+r.site); }
+    save(); closeDrawer(); render(true); toast(r.ref+' saved');
+  },
+  delJob(id){ const r=ramsById(id); ask('Delete '+r.ref+'?','This can’t be undone.','Delete',true,()=>{ S.rams=S.rams.filter(x=>x.id!==id); S.assets.forEach(a=>{ if(a.job===r.ref){ a.status='S'; a.job=null; } }); log(r.ref+' deleted'); save(); closeDrawer(); render(true); toast('Deleted'); }); },
+  openDoc(id){ closeDrawer(); ui.docId=id; ui.view='doc'; render(); },
+  goReady(id){ closeDrawer(); const r=ramsById(id); if(r) ui.readySel=r.id; ui.view='ready'; render(); },
+  editRams(id){ closeDrawer(); const r=ramsById(id); if(!r) return; startWizard(JSON.parse(JSON.stringify(r)), r.id, 'Edit '+r.ref+' Rev '+r.rev); },
+  newRev(id){ closeDrawer(); const r=ramsById(id); if(!r) return; const d=JSON.parse(JSON.stringify(r)); delete d.id; Object.assign(d,{rev:r.rev+1,status:'Draft',approver:'',approvedOn:'',note:'',signoff:{}}); startWizard(d,null,'New revision: '+r.ref+' Rev '+(r.rev+1)); toast('Rev '+r.rev+' stays current until Rev '+(r.rev+1)+' is approved'); },
+  dupRams(id){ closeDrawer(); const r=ramsById(id); if(!r) return; const d=JSON.parse(JSON.stringify(r)); delete d.id; Object.assign(d,{ref:'',rev:1,status:'Draft',approver:'',approvedOn:'',note:'First issue',signoff:{},site:r.site+' (copy)',start:addDays(TODAY,7)}); startWizard(d,null,'New RAMS from '+r.ref); },
+  closeRams(id){ const r=ramsById(id); ask('Close '+r.ref+'?','Marks the job as finished. The RAMS stays in the register and can be reopened as a new revision.','Close job',false,()=>{ r.status='Closed'; r.updated=new Date().toISOString(); S.assets.forEach(a=>{ if(a.job===r.ref){ a.status='S'; a.job=null; a.hist.push({t:new Date().toISOString(),msg:'Returned from '+r.ref}); } }); log(r.ref+' closed'); save(); closeDrawer(); render(true); toast(r.ref+' closed'); }); },
+  delRams(id){ const r=ramsById(id); ask('Delete '+r.ref+' Rev '+r.rev+'?','This can’t be undone.','Delete',true,()=>{ S.rams=S.rams.filter(x=>x.id!==id); log(r.ref+' Rev '+r.rev+' deleted'); save(); closeDrawer(); ui.view='rams'; render(); toast('Deleted'); }); },
+  step(i){ i=+i; const w=ui.wiz; if(i<0||i>3) return; if(i>w.step){ const bad=stepOk(i); if(bad) return toast(bad); } if(i===2) syncRisks(w.d); w.step=i; render(); },
+  saveWiz(arg){ saveWizard(arg==='stay'); },
+  crewAll(){ ui.crewAll=!ui.crewAll; render(true); },
+  addHz(){ const h=$('#nh-h').value.trim(); if(!h) return toast('Enter the hazard'); ui.wiz.d.risks.push({h,who:$('#nh-w').value.trim()||'Operatives',iL:3,iS:3,c:$('#nh-c').value.trim()||'Controls to be agreed.',rL:2,rS:3,src:'custom'}); render(true); },
+  rmHz(i){ ui.wiz.d.risks.splice(+i,1); render(true); },
+  regenMethod(){ const d=ui.wiz.d; d.methodEdited=false; d.method=genMethod(d); render(true); toast('Method statement rebuilt'); },
+  print(){
+    if(!EMBED){ try{ window.print(); return; }catch(e){} }
+    info('Print or save as PDF','Printing is switched off in this preview. In your installed copy this button opens the print dialog, already laid out for A4 with the client letterhead. Choose “Save as PDF” to email it.');
+  },
+  copyDoc(id){ const r=ramsById(id), c=client(r.client); const t=[`${c.name} · RISK ASSESSMENT & METHOD STATEMENT`,`${r.ref} Rev ${r.rev} · ${r.status}`,'',`Site: ${r.site}`,`Address: ${r.address}`,`Dates: ${fmt(r.start)} to ${fmt(jobEnd(r))}`,`Approved by: ${r.approver||'—'} ${r.approvedOn?fmt(r.approvedOn):''}`,'','SCOPE',r.scope,'','RISK ASSESSMENT',...r.risks.map((x,i)=>`${i+1}. ${x.h} (${x.who}) · initial ${x.iL*x.iS} · residual ${x.rL*x.rS} ${BANDN[band(x.rL,x.rS)]}\n   Controls: ${x.c}`),'','METHOD STATEMENT',r.method,'','PPE: '+ppeFor(r).join(', '),'',`EMERGENCY: 999 · A&E: ${r.hospital} · Assembly: ${r.assembly}`].join('\n'); showText('Copy RAMS as text',t); },
+  copyReady(id){ const r=ramsById(id), a=assess(r); const t=[`READINESS: ${VERD[a.verdict].t}`,`${r.ref}${READYONLY?' · RAMS '+(r.ramsRef||'awaited'):' Rev '+r.rev} · ${r.site} · ${client(r.client)?.name}`,`${fmt(a.start)} to ${fmt(a.end)} · checked ${fmt(TODAY)}`,'',...a.checks.filter(x=>x.lvl!=='pass').map(x=>`[${x.lvl.toUpperCase()}] ${x.t.replace(/<[^>]+>/g,'')}: ${x.p.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&#39;/g,"'")}`),'',`${a.checks.filter(x=>x.lvl==='pass').length} checks passed.`].join('\n'); showText('Readiness summary',t); },
+  bookKit(id){ const r=ramsById(id); const items=r.kit.map(asset).filter(a=>a&&a.status==='S'); ask('Book out '+items.length+' item(s) to '+r.ref+'?','They’ll show as On job until returned or the job is closed.','Book out',false,()=>{ items.forEach(a=>{ a.status='D'; a.job=r.ref; a.hist.push({t:new Date().toISOString(),msg:'Booked out to '+r.ref}); }); log(items.length+' item(s) booked out to '+r.ref); save(); render(true); toast('Kit booked out'); }); },
+  returnKit(id){ const r=ramsById(id); let n=0; S.assets.forEach(a=>{ if(a.job===r.ref){ a.status='S'; a.job=null; n++; a.hist.push({t:new Date().toISOString(),msg:'Returned from '+r.ref}); } }); log(n+' item(s) returned from '+r.ref); save(); render(true); toast(n+' item(s) returned'); },
+  sign(pid){ const r=ramsById(ui.readySel); r.signoff=r.signoff||{}; r.signoff[pid]=new Date().toISOString(); log('Briefing for '+r.ref+' signed by '+person(pid)?.name); save(); render(true); },
+  unsign(pid){ const r=ramsById(ui.readySel); delete r.signoff[pid]; save(); render(true); },
+  editClient(id){ drawerClient(id); },
+  saveClient(id){ const v=formVals($('#cform')); if(!v.name.trim()) return toast('Enter the company name'); const ppe=v.ppe.split(',').map(s=>s.trim()).filter(Boolean); const initials=(v.initials||v.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2)).toUpperCase();
+    if(id){ Object.assign(client(id),{...v,ppe,initials}); log('Client updated: '+v.name); } else { const c={id:uid('c'),...v,ppe,initials}; S.clients.push(c); log('Client added: '+v.name); }
+    save(); closeDrawer(); render(true); toast('Client saved'); },
+  delClient(id){ const c=client(id); ask('Delete '+c.name+'?','','Delete',true,()=>{ S.clients=S.clients.filter(x=>x.id!==id); if(ui.ws===id) ui.ws='all'; log('Client deleted: '+c.name); save(); closeDrawer(); render(); }); },
+  openAsset(id){ drawerAsset(id); },
+  addAsset(){ const cid=ui.ws!=='all'?ui.ws:S.clients[0]?.id; ask('Add kit item','','Add item',false,v=>{ if(!v.name.trim()) return toast('Enter the item name'); const T=ASSET_TYPES[v.type]; const last=v.last||TODAY; const a={id:uid('a'),client:v.client,type:v.type,name:v.name.trim(),serial:v.serial.trim()||('NEW-'+(S.assets.length+1)),last,next:addDays(last,T.every),status:'S',job:null,note:'',hist:[{t:new Date().toISOString(),msg:'Added; '+T.insp+' '+fmt(last)}]}; S.assets.push(a); log('Kit added: '+a.serial+' '+a.name); save(); render(true); toast('Item added'); },
+    `<div class="fields" style="grid-template-columns:1fr">${fld('Type',`<select name="type">${Object.entries(ASSET_TYPES).map(([k,t])=>opt(k,t.l)).join('')}</select>`)}${fld('Item name',`<input name="name" placeholder="e.g. Scissor lift 10 m">`,'',true)}${fld('ID / serial',`<input name="serial" placeholder="e.g. BR-MEWP-02">`)}${fld('Client',`<select name="client">${S.clients.map(c=>opt(c.id,c.name,c.id===cid)).join('')}</select>`)}${fld('Last inspection date',`<input type="date" name="last" value="${TODAY}">`)}</div>`); },
+  inspect(id){ const a=asset(id), T=ASSET_TYPES[a.type]; ask('Record '+T.insp.toLowerCase(),a.serial+' '+a.name,'Save',false,v=>{ const when=v.date||TODAY; if(v.result==='pass'){ a.last=when; a.next=addDays(when,T.every); if(a.status==='U'||a.status==='R'){ a.status='S'; a.note=''; } a.hist.push({t:new Date().toISOString(),msg:T.insp+' passed '+fmt(when)+(v.notes?': '+v.notes:'')+'. Next due '+fmt(a.next)}); toast('Next due '+fmt(a.next)); } else { a.status='U'; a.note=v.notes||'Failed '+T.insp.toLowerCase(); a.hist.push({t:new Date().toISOString(),msg:T.insp+' failed: '+a.note}); toast('Item quarantined'); } log(a.serial+' '+T.insp+' '+(v.result==='pass'?'passed':'failed')); save(); drawerAsset(id); render(true); },
+    `<div class="fields" style="grid-template-columns:1fr">${fld('Date',`<input type="date" name="date" value="${TODAY}">`)}${fld('Result',`<select name="result"><option value="pass">Pass</option><option value="fail">Fail (quarantine)</option></select>`)}${fld('Notes / certificate number',`<input name="notes">`)}</div>`); },
+  quarantine(id){ const a=asset(id); ask('Quarantine '+a.serial+'?','It will block every job it’s allocated to until it’s returned to service.','Quarantine',true,v=>{ a.status='U'; a.note=v.reason||'Defect reported'; a.hist.push({t:new Date().toISOString(),msg:'Quarantined: '+a.note}); log(a.serial+' quarantined: '+a.note); save(); drawerAsset(id); render(true); },`${fld('Reason',`<input name="reason" placeholder="e.g. Damaged lanyard webbing">`)}`); },
+  toRepair(id){ const a=asset(id); a.status='R'; a.hist.push({t:new Date().toISOString(),msg:'Sent for repair'}); log(a.serial+' sent for repair'); save(); drawerAsset(id); render(true); },
+  toService(id){ const a=asset(id); if(a.next<TODAY) return info('Inspection overdue','Record a passed '+ASSET_TYPES[a.type].insp.toLowerCase()+' first. That returns the item to service.'); a.status='S'; a.note=''; a.hist.push({t:new Date().toISOString(),msg:'Returned to service'}); log(a.serial+' returned to service'); save(); drawerAsset(id); render(true); },
+  delAsset(id){ const a=asset(id); ask('Delete '+a.serial+'?','It will also be removed from any RAMS it’s allocated to.','Delete',true,()=>{ S.assets=S.assets.filter(x=>x.id!==id); S.rams.forEach(r=>r.kit=r.kit.filter(k=>k!==id)); log('Kit deleted: '+a.serial); save(); closeDrawer(); render(true); }); },
+  openPerson(id){ drawerPerson(id); },
+  savePerson(id){ const v=formVals($('#pform')); if(!v.name.trim()) return toast('Enter a name'); const certs={}; Object.keys(CERTS).forEach(k=>{ if(v['cert_'+k]) certs[k]=v['cert_'+k]; });
+    if(id){ Object.assign(person(id),{name:v.name.trim(),role:v.role,client:v.client,certs}); log('Crew updated: '+v.name); } else { S.crew.push({id:uid('p'),name:v.name.trim(),role:v.role,client:v.client,certs}); log('Crew added: '+v.name); }
+    save(); closeDrawer(); render(true); toast('Saved'); },
+  delPerson(id){ const p=person(id); ask('Delete '+p.name+'?','They will be removed from any RAMS crew list.','Delete',true,()=>{ S.crew=S.crew.filter(x=>x.id!==id); S.rams.forEach(r=>r.crew=r.crew.filter(k=>k!==id)); log('Crew deleted: '+p.name); save(); closeDrawer(); render(true); }); },
+  exportRams(){ if(READYONLY) return showText('Jobs (CSV)',csv([['Job','Site','Address','Start','Days','RAMS ref','RAMS status','Crew','Kit','Readiness'],...latest().map(r=>[r.ref,r.site,r.address,r.start,r.days,r.ramsRef,stLabel(r.status),r.crew.map(person).filter(Boolean).map(p=>p.name).join('; '),r.kit.map(asset).filter(Boolean).map(a=>a.serial).join('; '),r.status==='Closed'?'':VERD[assess(r).verdict].t])]),'jobs.csv'); showText('RAMS register (CSV)',csv([['Ref','Rev','Client','Site','Address','Start','Days','Status','Highest residual','Readiness','Approved by','Approved on'],...latest().filter(r=>inWs(r.client)).map(r=>[r.ref,r.rev,client(r.client)?.name,r.site,r.address,r.start,r.days,r.status,BANDN[highestResidual(r)]||'',r.status==='Closed'?'':VERD[assess(r).verdict].t,r.approver,r.approvedOn])]),'rams-register.csv'); },
+  exportKit(){ showText('Kit & vehicles (CSV)',csv([['ID','Item','Type','Client','Status','Inspection','Last','Next due','Note'],...S.assets.filter(a=>inWs(a.client)).map(a=>[a.serial,a.name,ASSET_TYPES[a.type].l,client(a.client)?.name,ASTATUS[a.status].l,ASSET_TYPES[a.type].insp,a.last,a.next,a.note])]),'kit-register.csv'); },
+  exportCrew(){ showText('Crew & competence (CSV)',csv([['Name','Role','Client',...Object.values(CERTS).map(c=>c.l)],...S.crew.filter(p=>inWs(p.client)).map(p=>[p.name,p.role,client(p.client)?.name,...Object.keys(CERTS).map(k=>p.certs[k]||'')])]),'crew-competence.csv'); },
+  saveSettings(){ const v=formVals($('#sform')); S.settings.licensee=v.licensee.trim()||CFG.licensee; S.settings.preparer=v.preparer.trim(); log('Settings updated'); save(); render(true); toast('Saved'); },
+  backup(){ showText('Backup',JSON.stringify(S),'rams-readiness-backup.json'); },
+  restore(){ ask('Restore from backup','Paste the backup text. This replaces everything in this browser.','Restore',true,v=>{ try{ const o=JSON.parse(v.data); if(!o||o.v!==1||!Array.isArray(o.rams)) throw 0; S=o; save(); ui.view='dash'; render(); toast('Restored'); }catch(e){ info('That backup didn’t load','Check you pasted the whole backup text.'); } },`<textarea name="data" class="copy" placeholder="Paste backup here"></textarea>`); },
+  reset(){ ask('Reset to sample data?','Everything you’ve entered in this browser will be replaced with the sample clients.','Reset',true,()=>{ S=seed(); save(); ui.ws='all'; ui.view='dash'; render(); toast('Sample data loaded'); }); }
+};
+
+/* ================= Events ================= */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  if(b.tagName==='INPUT'&&b.type==='checkbox'){ ACT[b.dataset.act]?.(b.dataset.arg,b,e); return; }
+  if(b.disabled) return;
+  e.preventDefault(); ACT[b.dataset.act]?.(b.dataset.arg??'',b,e);
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.bind&&ui.wiz){ const k=t.dataset.bind; ui.wiz.d[k]= k==='days'?Math.max(1,parseInt(t.value)||1):t.value; if(k==='method') ui.wiz.d.methodEdited=true; return; }
+  if(t.dataset.risk&&ui.wiz&&t.tagName==='TEXTAREA'){ const [i,k]=t.dataset.risk.split(':'); ui.wiz.d.risks[+i][k]=t.value; return; }
+  if(t.dataset.on==='q'){ ui.f.q=t.value; refreshTable(); }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.bind&&ui.wiz){ const d=ui.wiz.d, k=t.dataset.bind;
+    if(k==='client'){ d.client=t.value; const c=client(t.value); if(c){ if(!d.hospital) d.hospital=c.hospital; if(!d.assembly) d.assembly=c.assembly; if(!d.contact) d.contact=c.contact; if(!d.contactPhone) d.contactPhone=c.phone; } d.crew=d.crew.filter(id=>ui.crewAll||person(id)?.client===d.client); d.kit=d.kit.filter(id=>asset(id)?.client===d.client); render(true); }
+    else if(k==='status'){ d.status=t.value; if(t.value==='Approved'&&d.risks.some(r=>band(r.rL,r.rS)==='H')) toast('High residual risk: approval will be blocked on save'); }
+    return; }
+  if(t.dataset.tog&&ui.wiz){ const d=ui.wiz.d, arr=d[t.dataset.tog]; const i=arr.indexOf(t.value); if(t.checked&&i<0) arr.push(t.value); if(!t.checked&&i>=0) arr.splice(i,1); if(t.dataset.tog==='conds'||t.dataset.tog==='tasks') syncRisks(d); render(true); return; }
+  if(t.dataset.risk&&ui.wiz&&t.tagName==='SELECT'){ const [i,k]=t.dataset.risk.split(':'); ui.wiz.d.risks[+i][k]=+t.value; render(true); return; }
+  if(t.dataset.on==='ws'){ ui.ws=t.value; closeDrawer(); if(ui.view==='wizard'||ui.view==='doc') ui.view='dash'; render(); return; }
+  if(t.dataset.on==='readySel'){ ui.readySel=t.value; render(true); return; }
+  if(t.dataset.on==='type'||t.dataset.on==='status'){ ui.f[t.dataset.on]=t.value; refreshTable(); }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('#modal').classList.contains('open')) closeModal(); else closeDrawer(); } });
+function refreshTable(){ const el=$('#tbl'); if(!el) return; el.innerHTML= ui.view==='rams'?(READYONLY?jobsTable():ramsTable()): ui.view==='kit'?kitTable(): ui.view==='crew'?crewTable():''; }
+
+/* ================= Boot ================= */
+S=load(); save(); render();
+</script>
+</body>
+</html>
