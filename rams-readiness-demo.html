@@ -884,7 +884,7 @@ VIEWS.dash=()=>{
     <button class="tile ${soonNo?'bad':''}" data-act="go" data-arg="${RAMSONLY?'rams':'ready'}"><span class="n">${soon.length}</span><span class="l">Starting in 14 days</span><small>${soonNo} ${RAMSONLY?'not approved':'not ready'}</small></button>${tail}
   </div>
   <div class="grid g-2">
-    <div class="panel"><h2>Upcoming and live jobs <small>readiness on today’s data</small></h2>
+    <div class="panel"><h2>Upcoming and live jobs <small>${RAMSONLY?'by start date':'readiness on today’s data'}</small></h2>
       ${up.length?up.map(r=>{ const c=client(r.client); return `<div class="row click" data-act="goReady" data-arg="${r.id}"><div><div class="nm"><span class="dot" style="background:${esc(c?.colour)}"></span>${esc(r.site)}</div><div class="meta"><span class="mono">${esc(r.ref)}${READYONLY?'':' Rev '+r.rev}</span> · ${READYONLY?'RAMS '+(esc(r.ramsRef)||'awaited'):esc(c?.name)} · ${fmt(r.start)}, ${r.days} day${r.days>1?'s':''}</div></div><div>${chipFor(r)}</div></div>`; }).join(''):'<div class="empty">No upcoming jobs.</div>'}
     </div>
     <div class="panel"><h2>Needs attention <small>${al.length} item${al.length===1?'':'s'}</small></h2>
@@ -1425,5 +1425,7 @@ function refreshTable(){ const el=$('#tbl'); if(!el) return; el.innerHTML= ui.vi
 /* ================= Boot ================= */
 S=load(); save(); render();
 </script>
+<script data-goatcounter="https://emilendres.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
